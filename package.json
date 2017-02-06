@@ -8,6 +8,7 @@
   "scripts": {
     "build": "babel src --out-dir build"
   },
+  "bin": "./bin/stanzarize.js",
   "dependencies": {
     "app-root-dir": "^1.0.2",
     "assets-webpack-plugin": "^3.5.1",
