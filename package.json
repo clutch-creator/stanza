@@ -6,7 +6,8 @@
   "author": "Bruno Mota <bruno12mota@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "build": "babel src --out-dir build"
+    "build": "babel src --out-dir dist",
+    "prepublish": "npm run build"
   },
   "bin": "./bin/stanzarize.js",
   "dependencies": {
