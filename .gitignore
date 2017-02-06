@@ -3,6 +3,7 @@
 
 # Build output folders
 build/
+dist/
 
 # Logs
 logs

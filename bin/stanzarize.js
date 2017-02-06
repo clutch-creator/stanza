@@ -17,28 +17,24 @@ if (typeof cmdValue === 'undefined') {
   process.exit(1);
 }
 
-function runDevelopment () {
-  require('../build/development');
-}
-
 switch (cmdValue) {
   case 'development':
-    require('../build/development');
+    require('../dist/development');
     break;
   case 'analyze':
-    require('../build/scripts/analyze');
+    require('../dist/scripts/analyze');
     break;
   case 'build':
-    require('../build/scripts/build');
+    require('../dist/scripts/build');
     break;
   case 'clean':
-    require('../build/scripts/clean');
+    require('../dist/scripts/clean');
     break;
   case 'deploy':
-    require('../build/scripts/deploy');
+    require('../dist/scripts/deploy');
     break;
   case 'preinstall':
-    require('../build/scripts/preinstall');
+    require('../dist/scripts/preinstall');
     break;
   default:
     console.error('Invalid command: ', cmdValue);
