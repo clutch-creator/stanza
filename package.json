@@ -1,8 +1,8 @@
 {
-  "name": "stanza",
+  "name": "stanza-pack",
   "version": "1.0.0",
   "main": "bin/stanza.js",
-  "repository": "git@github.com:shift-studio/stanza.git",
+  "repository": "git@github.com:stanza/stanza.git",
   "author": "Bruno Mota <bruno12mota@gmail.com>",
   "license": "MIT",
   "scripts": {
