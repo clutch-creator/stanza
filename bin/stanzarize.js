@@ -19,7 +19,19 @@ if (typeof cmdValue === 'undefined') {
 
 switch (cmdValue) {
   case 'development':
-    require('../dist/development');
+    require('../dist/scripts/development');
+    break;
+  case 'test':
+    require('../dist/scripts/test').default();
+    break;
+  case 'test-watch':
+    require('../dist/scripts/test').default(true);
+    break;
+  case 'lint':
+    require('../dist/scripts/lint').default();
+    break;
+  case 'lint-fix':
+    require('../dist/scripts/lint').default(true);
     break;
   case 'analyze':
     require('../dist/scripts/analyze');
