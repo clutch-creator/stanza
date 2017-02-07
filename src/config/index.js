@@ -340,17 +340,7 @@ export const clientConfig = filterObject(
   // object.  Simply define the properties you would like to be included in the
   // client config, supplying a truthy value to them in order to ensure they
   // get included in the client bundle.
-  {
-    // We only need to expose the enabled flag of the service worker.
-    serviceWorker: {
-      enabled: true,
-    },
-    // We need to expose all the polyfill.io settings.
-    polyfillIO: true,
-    // We need to expose all the htmlPage settings.
-    htmlPage: true,
-    additionalNodeBundles: true,
-  },
+  {},
 );
 
 // Export the main config as the default export.

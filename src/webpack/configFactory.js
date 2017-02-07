@@ -415,6 +415,33 @@ export default function webpackConfigFactory(buildOptions) {
       // END: HAPPY PACK PLUGINS
       // -----------------------------------------------------------------------
 
+      // Client HTML
+      ifClient(
+        () => new HtmlWebpackPlugin({
+          filename: 'index.html',
+          template: path.resolve(__dirname, 'html-page'),
+          minify: {
+            removeComments: true,
+            collapseWhitespace: true,
+            removeRedundantAttributes: true,
+            useShortDoctype: true,
+            removeEmptyAttributes: true,
+            removeStyleLinkTypeAttributes: true,
+            keepClosingSlash: true,
+            minifyJS: true,
+            minifyCSS: true,
+            minifyURLs: true,
+          },
+          inject: true,
+          // We pass our config objects as values as they will be needed
+          // by the template.
+          custom: {
+            config,
+            clientConfig,
+          },
+        }),
+      ),
+
       // Service Worker - Offline Page generation.
       //
       // We use the HtmlWebpackPlugin to produce an "offline" html page that

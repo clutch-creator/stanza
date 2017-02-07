@@ -39,7 +39,7 @@ export default function generate(templateParams) {
         ${linkTags(config.htmlPage.links)}
       </head>
       <body>
-        <div id='app'></div>
+        <div id='root'></div>
         <script type="text/javascript" nonce="NONCE_TARGET">
           ${
             // Binds the client configuration object to the window object so
@@ -54,6 +54,16 @@ export default function generate(templateParams) {
           // may need the polyfill's before our client bundle gets parsed.
           config.polyfillIO.enabled
             ? scriptTag(config.polyfillIO.url)
+            : ''
+        }
+        ${
+          // When we are in development mode our development server will generate a
+          // vendor DLL in order to dramatically reduce our compilation times.  Therefore
+          // we need to inject the path to the vendor dll bundle below.
+          // @see /tools/development/ensureVendorDLLExists.js
+          process.env.NODE_ENV === 'development'
+            && config.bundles.client.devVendorDLL.enabled
+            ? scriptTag(`${config.bundles.client.webPath}${config.bundles.client.devVendorDLL.name}.js`)
             : ''
         }
         ${scriptTags(config.htmlPage.scripts)}

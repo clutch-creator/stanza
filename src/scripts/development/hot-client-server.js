@@ -40,11 +40,10 @@ class HotClientServer {
       log: false,
     }));
 
-    // Configure serving of our client bundle.
-    // app.use(config.bundles.client.webPath, clientBundle);
+    // Configure serving dll
+    app.use('/assets', express.static(path.resolve(appRootDir.get(), config.bundles.client.outputPath)));
 
-    // Configure static serving of our "public" root http path static files.
-    // Note: these will be served off the root (i.e. '/') of our application.
+    // Configure serving static files
     app.use(express.static(path.resolve(appRootDir.get(), config.publicAssetsPath)));
 
     const listener = app.listen(port, host, (err) => {
