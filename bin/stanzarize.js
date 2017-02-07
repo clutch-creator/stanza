@@ -30,9 +30,6 @@ switch (cmdValue) {
   case 'clean':
     require('../dist/scripts/clean');
     break;
-  case 'deploy':
-    require('../dist/scripts/deploy');
-    break;
   case 'preinstall':
     require('../dist/scripts/preinstall');
     break;
