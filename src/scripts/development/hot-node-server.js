@@ -5,6 +5,8 @@ import { log } from '../../utils';
 
 class HotNodeServer {
   constructor(name, compiler, clientCompiler) {
+    let initial = true;
+
     const compiledEntryFile = path.resolve(
       appRootDir.get(),
       compiler.options.output.path,
@@ -25,16 +27,20 @@ class HotNodeServer {
       const newServer = spawn('node', [compiledEntryFile]);
 
       log({
-        title: name,
+        title: `[${name}]`,
         level: 'info',
-        message: 'Server running with latest changes.',
+        message: '✨  Running with latest changes.',
         notify: true,
       });
 
-      newServer.stdout.on('data', data => console.log(data.toString().trim()));
+      newServer.stdout.on('data', data => log({
+        title: `[${name}]`,
+        level: 'info',
+        message: data.toString().trim(),
+      }));
       newServer.stderr.on('data', (data) => {
         log({
-          title: name,
+          title: `[${name}]`,
           level: 'error',
           message: 'Error in server execution, check the console for more info.',
         });
@@ -70,11 +76,13 @@ class HotNodeServer {
 
     compiler.plugin('compile', () => {
       this.serverCompiling = true;
-      log({
-        title: name,
-        level: 'info',
-        message: 'Building new bundle...',
-      });
+      if (!initial) {
+        log({
+          title: name,
+          level: 'info',
+          message: 'Building new bundle...',
+        });
+      }
     });
 
     compiler.plugin('done', (stats) => {
@@ -106,6 +114,8 @@ class HotNodeServer {
         });
         console.error(err);
       }
+
+      initial = false;
     });
 
     // Lets start the compiler.

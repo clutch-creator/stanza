@@ -2,13 +2,12 @@ import chokidar from 'chokidar';
 import { resolve as pathResolve } from 'path';
 import appRootDir from 'app-root-dir';
 import { log } from '../../utils';
+import HotDevelopment from './hot-development';
 
-let HotDevelopment = require('./hotDevelopment').default;
 let devServer = new HotDevelopment();
 
 // Any changes to our webpack bundleConfigs should restart the development devServer.
 const watcher = chokidar.watch([
-  pathResolve(appRootDir.get(), 'tools'),
   pathResolve(appRootDir.get(), 'config'),
 ]);
 watcher.on('ready', () => {
@@ -28,9 +27,6 @@ watcher.on('ready', () => {
         }
       });
 
-      // Re-require the development devServer so that all new configs are used.
-      HotDevelopment = require('./hotDevelopment').default;
-
       // Create a new development devServer.
       devServer = new HotDevelopment();
     });
@@ -38,4 +34,6 @@ watcher.on('ready', () => {
 });
 
 // If we receive a kill cmd then we will first try to dispose our listeners.
-process.on('SIGTERM', () => devServer && devServer.dispose().then(() => process.exit(0)));
+process.on('SIGTERM', () =>
+  devServer && devServer.dispose().then(() => process.exit(0)),
+);

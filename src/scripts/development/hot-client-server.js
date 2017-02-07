@@ -1,11 +1,15 @@
 import express from 'express';
 import createWebpackMiddleware from 'webpack-dev-middleware';
 import createWebpackHotMiddleware from 'webpack-hot-middleware';
-import ListenerManager from './listenerManager';
+import appRootDir from 'app-root-dir';
+import path from 'path';
+import ListenerManager from './listener-manager';
 import { log } from '../../utils';
+import config from '../../config';
 
 class HotClientServer {
   constructor(compiler) {
+    let initial = true;
     const app = express();
 
     const httpPathRegex = /^https?:\/\/(.*):([\d]{1,5})/i;
@@ -32,24 +36,43 @@ class HotClientServer {
     });
 
     app.use(this.webpackDevMiddleware);
-    app.use(createWebpackHotMiddleware(compiler));
+    app.use(createWebpackHotMiddleware(compiler, {
+      log: false,
+    }));
 
-    const listener = app.listen(port, host);
+    // Configure serving of our client bundle.
+    // app.use(config.bundles.client.webPath, clientBundle);
+
+    // Configure static serving of our "public" root http path static files.
+    // Note: these will be served off the root (i.e. '/') of our application.
+    app.use(express.static(path.resolve(appRootDir.get(), config.publicAssetsPath)));
+
+    const listener = app.listen(port, host, (err) => {
+      if (err) {
+        log({
+          title: '[CLIENT]',
+          level: 'error',
+          message: 'Error starting client server',
+        });
+      }
+    });
 
     this.listenerManager = new ListenerManager(listener, 'client');
 
     compiler.plugin('compile', () => {
-      log({
-        title: 'client',
-        level: 'info',
-        message: 'Building new bundle...',
-      });
+      if (!initial) {
+        log({
+          title: '[CLIENT]',
+          level: 'info',
+          message: 'Building new bundle...',
+        });
+      }
     });
 
     compiler.plugin('done', (stats) => {
       if (stats.hasErrors()) {
         log({
-          title: 'client',
+          title: '[CLIENT]',
           level: 'error',
           message: 'Build failed, please check the console for more information.',
           notify: true,
@@ -57,12 +80,22 @@ class HotClientServer {
         console.error(stats.toString());
       } else {
         log({
-          title: 'client',
+          title: '[CLIENT]',
           level: 'info',
-          message: 'Running with latest changes.',
+          message: '✨  Running with latest changes.',
           notify: true,
         });
       }
+
+      if (initial) {
+        log({
+          title: '[CLIENT]',
+          level: 'info',
+          message: `Client served at http://${host}:${port}`,
+        });
+      }
+
+      initial = false;
     });
   }
 

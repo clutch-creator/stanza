@@ -28,7 +28,6 @@ import config, { clientConfig } from '../config';
  */
 export default function webpackConfigFactory(buildOptions) {
   const { target, mode } = buildOptions;
-  console.log(`==> Creating webpack config for "${target}" in "${mode}" mode`);
 
   const isDev = mode === 'development';
   const isProd = mode === 'production';
