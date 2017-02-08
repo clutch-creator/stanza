@@ -5,6 +5,10 @@
 // Note: all file/folder paths should be relative to the project root. The
 // absolute paths should be resolved during runtime by our build tools/server.
 
+import fs from 'fs';
+import path from 'path';
+import appRootDir from 'app-root-dir';
+import merge from 'deepmerge';
 import { getStringEnvVar, getIntEnvVar } from './internals/environmentVars';
 import filterObject from './internals/filterObject';
 
@@ -15,7 +19,8 @@ if (process.env.IS_CLIENT) {
   throw new Error("You shouldn't be importing the `./config` directly into your 'client' or 'shared' source as the configuration object will get included in your client bundle. Not a safe move! Instead, use the `safeConfigGet` helper function (located at `./src/shared/utils/config`) within the 'client' or 'shared' source files to reference configuration values in a safe manner.");
 }
 
-const config = {
+// eslint-disable-next-line
+let config = {
   // The host on which the server should run.
   host: getStringEnvVar('SERVER_HOST', 'localhost'),
 
@@ -121,34 +126,14 @@ const config = {
   // @see https://github.com/nfl/react-helmet
   htmlPage: {
     htmlAttributes: { lang: 'en' },
-    titleTemplate: 'React, Universally - %s',
-    defaultTitle: 'React, Universally',
-    meta: [
-      {
-        name: 'description',
-        content: 'A starter kit giving you the minimum requirements for a production ready universal react application.',
-      },
-      // Default content encoding.
-      { name: 'charset', content: 'utf-8' },
-      // @see http://bit.ly/2f8IaqJ
-      { 'http-equiv': 'X-UA-Compatible', content: 'IE=edge' },
-      // This is important to signify your application is mobile responsive!
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      // Providing a theme color is good if you are doing a progressive
-      // web application.
-      { name: 'theme-color', content: '#2b2b2b' },
-    ],
+    titleTemplate: 'Stanzarize - %s',
+    defaultTitle: 'Stanzarize',
+    meta: [],
     links: [
       // When building a progressive web application you need to supply
       // a manifest.json as well as a variety of icon types. This can be
       // tricky. Luckily there is a service to help you with this.
       // http://realfavicongenerator.net/
-      { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' },
-      { rel: 'icon', type: 'image/png', href: '/favicon-32x32.png', sizes: '32x32' },
-      { rel: 'icon', type: 'image/png', href: '/favicon-16x16.png', sizes: '16x16' },
-      { rel: 'mask-icon', href: '/safari-pinned-tab.svg', color: '#00a9d9' },
-      // Make sure you update your manifest.json to match your application.
-      { rel: 'manifest', href: '/manifest.json' },
     ],
     scripts: [
       // Example:
@@ -307,6 +292,12 @@ const config = {
     },
   },
 };
+
+const confPath = path.resolve(appRootDir.get(), 'stanza', 'index.js');
+if (fs.existsSync(confPath)) {
+  const conf = require(confPath);
+  config = merge(config, conf);
+}
 
 // Export the client configuration object.
 export const clientConfig = filterObject(
