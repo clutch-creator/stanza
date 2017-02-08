@@ -8,6 +8,8 @@ export default (watch) => {
   if (watch) {
     argv.push('--watch');
     argv.push('--notify');
+  } else {
+    argv.push('--forceExit');
   }
 
   // add config

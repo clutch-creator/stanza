@@ -6,5 +6,6 @@ module.exports = babelJest.createTransformer({
     'es2015',
     'stage-0',
   ],
+  plugins: ['transform-runtime'],
   babelrc: false,
 });
