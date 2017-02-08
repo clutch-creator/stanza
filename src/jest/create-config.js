@@ -4,8 +4,8 @@ import appRootDir from 'app-root-dir';
 
 export default () => {
   const rootDir = appRootDir.get();
-  const setupTestFilePath = path.resolve(rootDir, 'test', 'setup-test.js');
-  const setupTestsFile = fs.existsSync(setupTestFilePath) ? '<rootDir>/src/setupTests.js' : undefined;
+  const setupTestFilePath = path.resolve(rootDir, 'stanza', 'setup-test.js');
+  const setupTestsFile = fs.existsSync(setupTestFilePath) ? setupTestFilePath : undefined;
 
   return {
     rootDir,
