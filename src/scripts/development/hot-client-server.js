@@ -41,7 +41,10 @@ class HotClientServer {
     }));
 
     // Configure serving dll
-    app.use('/assets', express.static(path.resolve(appRootDir.get(), config.bundles.client.outputPath)));
+    app.use(
+      config.bundles.client.webPath,
+      express.static(path.resolve(appRootDir.get(), config.bundles.client.outputPath)),
+    );
 
     // Configure serving static files
     app.use(express.static(path.resolve(appRootDir.get(), config.publicAssetsPath)));

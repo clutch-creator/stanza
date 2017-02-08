@@ -175,7 +175,7 @@ const config = {
       outputPath: './build/client',
 
       // What is the public http path at which we must serve the bundle from?
-      webPath: '/assets/',
+      webPath: '/',
 
       // Configuration settings for the development vendor DLL.  This will be created
       // by our development server and provides an improved dev experience
