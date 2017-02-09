@@ -39,5 +39,9 @@ export default () => {
       'text-summary',
     ],
     collectCoverageFrom: ['src/**/*.{js,jsx}'],
+    coveragePathIgnorePatterns: [
+      '/node_modules',
+      '/test',
+    ],
   };
 };
