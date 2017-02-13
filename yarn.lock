@@ -2076,9 +2076,9 @@ eslint-config-airbnb@^14.1.0:
   dependencies:
     eslint-config-airbnb-base "^11.1.0"
 
-eslint-config-stanza@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/eslint-config-stanza/-/eslint-config-stanza-1.0.1.tgz#bdc88ae10f0c25482abd313ef3e48894b355dbcb"
+eslint-config-stanza@1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/eslint-config-stanza/-/eslint-config-stanza-1.0.2.tgz#0d08d31071dc7e85064c32279fc59be366c59957"
   dependencies:
     babel-eslint "^7.1.1"
     eslint "^3.15.0"
