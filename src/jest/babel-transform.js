@@ -7,6 +7,7 @@ module.exports = babelJest.createTransformer({
     'stage-0',
   ],
   plugins: [
+    'transform-decorators-legacy',
     'transform-runtime',
     'transform-es2015-modules-commonjs',
   ],
