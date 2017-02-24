@@ -42,6 +42,9 @@ switch (cmdValue) {
   case 'clean':
     require('../dist/scripts/clean');
     break;
+  case 'docs':
+    require('../dist/scripts/docs');
+    break;
   case 'preinstall':
     require('../dist/scripts/preinstall');
     break;
