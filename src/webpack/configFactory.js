@@ -407,8 +407,14 @@ export default function webpackConfigFactory(buildOptions) {
             {
               path: 'css-loader',
               // Include sourcemaps for dev experience++.
-              query: { sourceMap: true },
+              query: {
+                sourceMap: true,
+                modules: true,
+                importLoaders: 1,
+                localIdentName: '[name]__[local]___[hash:base64:5]',
+              },
             },
+            'sass-loader',
           ],
         }),
       ),
@@ -607,14 +613,14 @@ export default function webpackConfigFactory(buildOptions) {
         ifElse(isClient || isServer)(
           merge(
             {
-              test: /\.(css|less)$/,
+              test: /\.(css|sass|scss)$/,
             },
             // For development clients we will defer all our css processing to the
             // happypack plugin named "happypack-devclient-css".
             // See the respective plugin within the plugins section for full
             // details on what loader is being implemented.
             ifDevClient({
-              loaders: ['happypack/loader?id=happypack-devclient-css', 'less-loader'],
+              loaders: ['happypack/loader?id=happypack-devclient-css'],
             }),
             // For a production client build we use the ExtractTextPlugin which
             // will extract our CSS into CSS files. We don't use happypack here
@@ -625,7 +631,10 @@ export default function webpackConfigFactory(buildOptions) {
             ifProdClient(() => ({
               loader: ExtractTextPlugin.extract({
                 fallbackLoader: 'style-loader',
-                loaders: ['css-loader', 'less-loader'],
+                loaders: [
+                  'css-loader?modules&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]',
+                  'sass-loader',
+                ],
               }),
             })),
             // When targetting the server we use the "/locals" version of the
