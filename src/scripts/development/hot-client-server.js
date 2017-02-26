@@ -1,6 +1,7 @@
 import express from 'express';
 import createWebpackMiddleware from 'webpack-dev-middleware';
 import createWebpackHotMiddleware from 'webpack-hot-middleware';
+import historyApiFallback from 'connect-history-api-fallback';
 import appRootDir from 'app-root-dir';
 import path from 'path';
 import ListenerManager from './listener-manager';
@@ -48,6 +49,10 @@ class HotClientServer {
 
     // Configure serving static files
     app.use(express.static(path.resolve(appRootDir.get(), config.publicAssetsPath)));
+
+    // Fallback
+    app.use(historyApiFallback());
+    app.use(this.webpackDevMiddleware);
 
     const listener = app.listen(port, host, (err) => {
       if (err) {
