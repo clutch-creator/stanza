@@ -2,6 +2,8 @@ import jest from 'jest';
 import createConfig from '../../jest/create-config';
 
 export default (watch) => {
+  process.env.NODE_ENV = 'test';
+
   const argv = [];
 
   // test

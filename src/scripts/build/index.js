@@ -7,6 +7,8 @@ import webpackConfigFactory from '../webpack/configFactory';
 import { exec } from '../utils';
 import config from '../config';
 
+process.env.NODE_ENV = 'production';
+
 // First clear the build output dir.
 exec(`rimraf ${pathResolve(appRootDir.get(), config.buildOutputPath)}`);
 

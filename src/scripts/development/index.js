@@ -4,6 +4,8 @@ import appRootDir from 'app-root-dir';
 import { log } from '../../utils';
 import HotDevelopment from './hot-development';
 
+process.env.NODE_ENV = 'development';
+
 let devServer = new HotDevelopment();
 
 // Any changes to our webpack bundleConfigs should restart the development devServer.
