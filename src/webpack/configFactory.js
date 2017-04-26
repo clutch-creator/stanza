@@ -419,6 +419,16 @@ export default function webpackConfigFactory(buildOptions) {
         }),
       ),
 
+      // HappyPack 'graphql' instance for development.
+      ifDev(
+        () => happyPackPlugin({
+          name: 'happypack-devclient-gql',
+          loaders: [
+            'happypack/loader',
+          ],
+        }),
+      ),
+
       // END: HAPPY PACK PLUGINS
       // -----------------------------------------------------------------------
 
@@ -589,14 +599,6 @@ export default function webpackConfigFactory(buildOptions) {
       ),
     ]),
     module: {
-      loaders: [
-        // Graphql files loader
-        {
-          test: /\.(graphql|gql)$/,
-          exclude: /node_modules/,
-          loader: 'graphql-tag/loader',
-        },
-      ],
       rules: removeEmpty([
         // JAVASCRIPT
         {
@@ -651,6 +653,14 @@ export default function webpackConfigFactory(buildOptions) {
               loaders: ['css-loader/locals'],
             }),
           ),
+        ),
+
+        // GraphQL
+        ifElse(isClient || isServer)(
+          {
+            test: /\.(graphql|gql)$/,
+            loaders: ['happypack/loader?id=happypack-devclient-gql'],
+          },
         ),
 
         // ASSETS (Images/Fonts/etc)
