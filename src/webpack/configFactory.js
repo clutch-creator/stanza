@@ -419,16 +419,6 @@ export default function webpackConfigFactory(buildOptions) {
         }),
       ),
 
-      // HappyPack 'graphql' instance for development.
-      ifDev(
-        () => happyPackPlugin({
-          name: 'happypack-devclient-gql',
-          loaders: [
-            'happypack/loader',
-          ],
-        }),
-      ),
-
       // END: HAPPY PACK PLUGINS
       // -----------------------------------------------------------------------
 
@@ -656,12 +646,10 @@ export default function webpackConfigFactory(buildOptions) {
         ),
 
         // GraphQL
-        ifElse(isClient || isServer)(
-          {
-            test: /\.(graphql|gql)$/,
-            loaders: ['happypack/loader?id=happypack-devclient-gql'],
-          },
-        ),
+        {
+          test: /\.(graphql|gql)$/,
+          loaders: ['happypack/loader'],
+        },
 
         // ASSETS (Images/Fonts/etc)
         // This is bound to our server/client bundles as we only expect to be
