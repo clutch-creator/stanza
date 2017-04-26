@@ -648,7 +648,7 @@ export default function webpackConfigFactory(buildOptions) {
         // GraphQL
         {
           test: /\.(graphql|gql)$/,
-          loaders: ['happypack/loader'],
+          loaders: ['graphql-tag/loader'],
         },
 
         // ASSETS (Images/Fonts/etc)
