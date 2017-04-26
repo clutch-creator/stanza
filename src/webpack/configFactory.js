@@ -589,6 +589,14 @@ export default function webpackConfigFactory(buildOptions) {
       ),
     ]),
     module: {
+      loaders: [
+        // Graphql files loader
+        {
+          test: /\.(graphql|gql)$/,
+          exclude: /node_modules/,
+          loader: 'graphql-tag/loader',
+        },
+      ],
       rules: removeEmpty([
         // JAVASCRIPT
         {
