@@ -241,6 +241,8 @@ let config = {
   // configuration adjustments.  Additionally it helps to make merging
   // from the origin starter kit a bit easier.
   plugins: {
+    envConfig: envVars => envVars,
+
     // This plugin allows you to provide final adjustments your babel
     // configurations for each bundle before they get processed.
     //

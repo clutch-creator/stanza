@@ -44,6 +44,20 @@ export default function webpackConfigFactory(buildOptions) {
   const ifDevClient = ifElse(isDev && isClient);
   const ifProdClient = ifElse(isProd && isClient);
 
+  let clientEnvVariables = {
+    // Adding the NODE_ENV key is especially important as React relies
+    // on it to optimize production builds.
+    'process.env.NODE_ENV': JSON.stringify(mode),
+    // Is this the "client" bundle?
+    'process.env.IS_CLIENT': JSON.stringify(isClient),
+    // Is this the "server" bundle?
+    'process.env.IS_SERVER': JSON.stringify(isServer),
+    // Is this a node bundle?
+    'process.env.IS_NODE': JSON.stringify(isNode),
+  };
+
+  clientEnvVariables = config.plugins.envConfig(clientEnvVariables);
+
   // Resolve the bundle configuration.
   const bundleConfig = isServer || isClient
     // This is either our "server" or "client" bundle.
@@ -235,17 +249,7 @@ export default function webpackConfigFactory(buildOptions) {
       // At the same time please be careful with what environment variables you
       // use in each respective bundle.  For example, don't accidentally
       // expose a database connection string within your client bundle src!
-      new webpack.DefinePlugin({
-        // Adding the NODE_ENV key is especially important as React relies
-        // on it to optimize production builds.
-        'process.env.NODE_ENV': JSON.stringify(mode),
-        // Is this the "client" bundle?
-        'process.env.IS_CLIENT': JSON.stringify(isClient),
-        // Is this the "server" bundle?
-        'process.env.IS_SERVER': JSON.stringify(isServer),
-        // Is this a node bundle?
-        'process.env.IS_NODE': JSON.stringify(isNode),
-      }),
+      new webpack.DefinePlugin(clientEnvVariables),
 
       // Generates a JSON file containing a map of all the output files for
       // our webpack bundle.  A necessisty for our server rendering process
