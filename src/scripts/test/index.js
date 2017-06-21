@@ -1,7 +1,7 @@
 import jest from 'jest';
 import createConfig from '../../jest/create-config';
 
-export default (watch) => {
+export default (watch, noCoverage = false) => {
   process.env.NODE_ENV = 'test';
 
   const argv = [];
@@ -15,7 +15,7 @@ export default (watch) => {
   }
 
   // add config
-  argv.push('--config', JSON.stringify(createConfig()));
+  argv.push('--config', JSON.stringify(createConfig(noCoverage)));
 
   jest.run(argv);
 };

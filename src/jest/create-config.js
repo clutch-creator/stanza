@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import appRootDir from 'app-root-dir';
 
-export default () => {
+export default (noCoverage) => {
   const rootDir = appRootDir.get();
   const setupTestFilePath = path.resolve(rootDir, 'stanza', 'setup-test.js');
   const setupTestsFile = fs.existsSync(setupTestFilePath) ? setupTestFilePath : undefined;
@@ -32,7 +32,7 @@ export default () => {
       '<rootDir>[/\\\\](build|docs|node_modules|scripts)[/\\\\]',
       '/_fixtures',
     ],
-    collectCoverage: true,
+    collectCoverage: !noCoverage,
     coverageReporters: [
       'json',
       'html',

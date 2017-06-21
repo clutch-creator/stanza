@@ -27,6 +27,9 @@ switch (cmdValue) {
   case 'test-watch':
     require('../dist/scripts/test').default(true);
     break;
+  case 'test-watch-no-coverage':
+    require('../dist/scripts/test').default(true, true);
+    break;
   case 'lint':
     require('../dist/scripts/lint').default();
     break;
