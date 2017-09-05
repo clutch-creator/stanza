@@ -150,9 +150,6 @@ let config = {
       srcPaths: [
         './src/client',
         './src/shared',
-        // The service worker offline page generation needs access to the
-        // config folder.  Don't worry we have guards within the config files
-        // to ensure they never get included in a client bundle.
         './config',
       ],
 

@@ -1,14 +1,11 @@
 import path from 'path';
-import { sync as globSync } from 'glob';
 import webpack from 'webpack';
-import OfflinePlugin from 'offline-plugin';
 import AssetsPlugin from 'assets-webpack-plugin';
 import nodeExternals from 'webpack-node-externals';
 import ExtractTextPlugin from 'extract-text-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import appRootDir from 'app-root-dir';
 import WebpackMd5Hash from 'webpack-md5-hash';
-import CodeSplitPlugin from 'code-split-component/webpack';
 import { removeEmpty, ifElse, merge, happyPackPlugin } from '../utils';
 import config, { clientConfig } from '../config';
 
@@ -29,37 +26,34 @@ import config, { clientConfig } from '../config';
 export default function webpackConfigFactory(buildOptions) {
   const { target, mode } = buildOptions;
 
+  // mode
   const isDev = mode === 'development';
   const isProd = mode === 'production';
+  const ifDev = ifElse(isDev);
+  const ifProd = ifElse(isProd);
+
+  // target
   const isClient = target === 'client';
-  const isServer = target === 'server';
-  const isNode = !isClient; // Any bundle but the client bundle must target node.
+  const isNode = target === 'server';
+  const ifClient = ifElse(isClient);
+  const ifNode = ifElse(isNode);
 
   // Preconfigure some ifElse helper instnaces. See the util docs for more
   // information on how this util works.
-  const ifDev = ifElse(isDev);
-  const ifProd = ifElse(isProd);
-  const ifNode = ifElse(isNode);
-  const ifClient = ifElse(isClient);
   const ifDevClient = ifElse(isDev && isClient);
   const ifProdClient = ifElse(isProd && isClient);
 
   let clientEnvVariables = {
-    // Adding the NODE_ENV key is especially important as React relies
-    // on it to optimize production builds.
     'process.env.NODE_ENV': JSON.stringify(mode),
-    // Is this the "client" bundle?
     'process.env.IS_CLIENT': JSON.stringify(isClient),
-    // Is this the "server" bundle?
-    'process.env.IS_SERVER': JSON.stringify(isServer),
-    // Is this a node bundle?
+    'process.env.IS_SERVER': JSON.stringify(isNode),
     'process.env.IS_NODE': JSON.stringify(isNode),
   };
 
   clientEnvVariables = config.plugins.envConfig(clientEnvVariables);
 
   // Resolve the bundle configuration.
-  const bundleConfig = isServer || isClient
+  const bundleConfig = isNode || isClient
     // This is either our "server" or "client" bundle.
     ? config.bundles[target]
     // Otherwise it must be an additional node bundle.
@@ -192,7 +186,7 @@ export default function webpackConfigFactory(buildOptions) {
       // be considered as being served from.
       // We only need to set this for our server/client bundles as the server
       // bundle is the application that serves the client bundle.
-      ifElse(isServer || isClient)(() => ({
+      ifElse(isNode || isClient)(() => ({
         publicPath: ifDev(
           // As we run a seperate development server for our client and server
           // bundles we need to use an absolute http path for the public path.
@@ -214,14 +208,6 @@ export default function webpackConfigFactory(buildOptions) {
     },
 
     plugins: removeEmpty([
-      // Required support for code-split-component, which provides us with our
-      // code splitting functionality.
-      //
-      // The code-split-component doesn't work nicely with React Hot Loader,
-      // which we use in our development builds, so we will disable it (which
-      // causes synchronous loading behaviour for the CodeSplit instances).
-      // ifProd(() => new CodeSplitPlugin()),
-
       // We use this so that our generated [chunkhash]'s are only different if
       // the content for our respective chunks have changed.  This optimises
       // our long term browser caching strategy for our client bundle, avoiding
@@ -231,24 +217,6 @@ export default function webpackConfigFactory(buildOptions) {
 
       // The DefinePlugin is used by webpack to substitute any patterns that it
       // finds within the code with the respective value assigned below.
-      //
-      // For example you may have the following in your code:
-      //   if (process.env.NODE_ENV === 'development') {
-      //     console.log('Foo');
-      //   }
-      //
-      // If we assign the NODE_ENV variable in the DefinePlugin below a value
-      // of 'production' webpack will replace your code with the following:
-      //   if ('production' === 'development') {
-      //     console.log('Foo');
-      //   }
-      //
-      // This is very useful as we are compiling/bundling our code and we would
-      // like our environment variables to persist within the code.
-      //
-      // At the same time please be careful with what environment variables you
-      // use in each respective bundle.  For example, don't accidentally
-      // expose a database connection string within your client bundle src!
       new webpack.DefinePlugin(clientEnvVariables),
 
       // Generates a JSON file containing a map of all the output files for
@@ -311,16 +279,6 @@ export default function webpackConfigFactory(buildOptions) {
       // START: HAPPY PACK PLUGINS
       //
       // @see https://github.com/amireh/happypack/
-      //
-      // HappyPack allows us to use threads to execute our loaders. This means
-      // that we can get parallel execution of our loaders, significantly
-      // improving build and recompile times.
-      //
-      // This may not be an issue for you whilst your project is small, but
-      // the compile times can be signficant when the project scales. A lengthy
-      // compile time can significantly impare your development experience.
-      // Therefore we employ HappyPack to do threaded execution of our
-      // "heavy-weight" loaders.
 
       // HappyPack 'javascript' instance.
       happyPackPlugin({
@@ -341,27 +299,9 @@ export default function webpackConfigFactory(buildOptions) {
               babelrc: false,
 
               presets: [
-                // JSX
                 'react',
-                // For our client bundles we transpile all the latest ratified
-                // ES201X code into ES5, safe for browsers.  We exclude module
-                // transilation as webpack takes care of this for us, doing
-                // tree shaking in the process.
                 ifClient(['latest', { es2015: { modules: false } }]),
-                // Stage 3 javascript syntax.
-                // "Candidate: complete spec and initial browser implementations."
-                // Add anything lower than stage 3 at your own risk. :)
                 'stage-0',
-                // For a node bundle we use the awesome babel-preset-env which
-                // acts like babel-preset-latest in that it supports the latest
-                // ratified ES201X syntax, however, it will only transpile what
-                // is necessary for a target environment.  We have configured it
-                // to target our current node version.  This is cool because
-                // recent node versions have extensive support for ES201X syntax.
-                // Also, we have disabled modules transpilation as webpack will
-                // take care of that for us ensuring tree shaking takes place.
-                // NOTE: Make sure you use the same node version for development
-                // and production.
                 ifNode(['env', { targets: { node: true }, modules: false }]),
               ].filter(x => x != null),
 
@@ -375,26 +315,6 @@ export default function webpackConfigFactory(buildOptions) {
                 // Adding this will give us the path to our components in the
                 // react dev tools.
                 ifDev('transform-react-jsx-source'),
-                // The following plugin supports the code-split-component
-                // instances, taking care of all the heavy boilerplate that we
-                // would have had to do ourselves to get code splitting w/SSR
-                // support working.
-                // @see https://github.com/ctrlplusb/code-split-component
-                //
-                // We only include it in production as this library does not support
-                // React Hot Loader, which we use in development.
-                // ifElse(isProd && (isServer || isClient))(
-                //   [
-                //     'code-split-component/babel',
-                //     {
-                //       // For our server bundle we will set the mode as being 'server'
-                //       // which will ensure that our code split components can be
-                //       // resolved synchronously, being much more helpful for
-                //       // pre-rendering.
-                //       mode: target,
-                //     },
-                //   ],
-                // ),
               ].filter(x => x != null),
             },
             buildOptions,
@@ -452,186 +372,29 @@ export default function webpackConfigFactory(buildOptions) {
           },
         }),
       ),
-
-      // Service Worker - Offline Page generation.
-      //
-      // We use the HtmlWebpackPlugin to produce an "offline" html page that
-      // can be used by our service worker (see the OfflinePlugin below) in
-      // order support offline rendering of our application.
-      // ifProdClient(
-      //   // We will only create the service worker required page if enabled in config.
-      //   ifElse(config.serviceWorker.enabled)(
-      //     () => new HtmlWebpackPlugin({
-      //       filename: config.serviceWorker.offlinePageFileName,
-      //       template: path.resolve(
-      //         appRootDir.get(), config.serviceWorker.offlinePageTemplate,
-      //       ),
-      //       minify: {
-      //         removeComments: true,
-      //         collapseWhitespace: true,
-      //         removeRedundantAttributes: true,
-      //         useShortDoctype: true,
-      //         removeEmptyAttributes: true,
-      //         removeStyleLinkTypeAttributes: true,
-      //         keepClosingSlash: true,
-      //         minifyJS: true,
-      //         minifyCSS: true,
-      //         minifyURLs: true,
-      //       },
-      //       inject: true,
-      //       // We pass our config objects as values as they will be needed
-      //       // by the template.
-      //       custom: {
-      //         config,
-      //         clientConfig,
-      //       },
-      //     }),
-      //   ),
-      // ),
-
-      // Service Worker - generation.
-      //
-      // NOTE: It is HIGHLY recommended to keep this plugin as the last item
-      // within the list as it needs to be aware of all possible manipulations
-      // that may have be done to assets by the previous plugins. This is an
-      // offical request/recommendation by the plugin author.
-      //
-      // This is bound to our server/client bundles as we only expect to be
-      // serving the client bundle as a Single Page Application through the
-      // server.
-      //
-      // We use the offline-plugin to generate the service worker.  It also
-      // provides a runtime installation script which gets executed within
-      // the client.
-      // @see https://github.com/NekR/offline-plugin
-      //
-      // This plugin generates a service worker script which as configured below
-      // will precache all our generated client bundle assets as well as our
-      // static "public" folder assets.
-      //
-      // It has also been configured to make use of a HtmlWebpackPlugin
-      // generated "offline" page so that users can still used the application
-      // offline.
-      //
-      // Any time our static files or generated bundle files change the user's
-      // cache will be updated.
-      // ifProdClient(
-      //   // We will only include the service worker if enabled in config.
-      //   ifElse(config.serviceWorker.enabled)(
-      //     () => new OfflinePlugin({
-      //       // Setting this value lets the plugin know where our generated client
-      //       // assets will be served from.
-      //       // e.g. /client/
-      //       publicPath: bundleConfig.webPath,
-      //       // When using the publicPath we need to disable the "relativePaths"
-      //       // feature of this plugin.
-      //       relativePaths: false,
-      //       // Our offline support will be done via a service worker.
-      //       // Read more on them here:
-      //       // http://bit.ly/2f8q7Td
-      //       ServiceWorker: {
-      //         // The name of the service worker script that will get generated.
-      //         output: config.serviceWorker.fileName,
-      //         // Enable events so that we can register updates.
-      //         events: true,
-      //         // By default the service worker will be ouput and served from the
-      //         // publicPath setting above in the root config of the OfflinePlugin.
-      //         // This means that it would be served from /client/sw.js
-      //         // We do not want this! Service workers have to be served from the
-      //         // root of our application in order for them to work correctly.
-      //         // Therefore we override the publicPath here. The sw.js will still
-      //         // live in at the /build/client/sw.js output location therefore in
-      //         // our server configuration we need to make sure that any requests
-      //         // to /sw.js will serve the /build/client/sw.js file.
-      //         publicPath: `/${config.serviceWorker.fileName}`,
-      //         // When the user is offline then this html page will be used at
-      //         // the base that loads all our cached client scripts.  This page
-      //         // is generated by the HtmlWebpackPlugin above, which takes care
-      //         // of injecting all of our client scripts into the body.
-      //         // Please see the HtmlWebpackPlugin configuration above for more
-      //         // information on this page.
-      //         navigateFallbackURL: `${bundleConfig.webPath}${config.serviceWorker.offlinePageFileName}`,
-      //       },
-      //       // According to the Mozilla docs, AppCache is considered deprecated.
-      //       // @see https://mzl.la/1pOZ5wF
-      //       // It does however have much wider support compared to the newer
-      //       // Service Worker specification, so you could consider enabling it
-      //       // if you needed.
-      //       AppCache: false,
-      //       // Which external files should be included with the service worker?
-      //       externals:
-      //         // Add the polyfill io script as an external if it is enabled.
-      //         (
-      //           config.polyfillIO.enabled
-      //             ? [config.polyfillIO.url]
-      //             : []
-      //         )
-      //         // Add any included public folder assets.
-      //         .concat(
-      //           config.serviceWorker.includePublicAssets.reduce((acc, cur) => {
-      //             const publicAssetPathGlob = path.resolve(
-      //               appRootDir.get(), config.publicAssetsPath, cur,
-      //             );
-      //             const publicFileWebPaths = acc.concat(
-      //               // First get all the matching public folder assets.
-      //               globSync(publicAssetPathGlob, { nodir: true })
-      //               // Then map them to relative paths against the public folder.
-      //               // We need to do this as we need the "web" paths for each one.
-      //               .map(publicFile => path.relative(
-      //                 path.resolve(appRootDir.get(), config.publicAssetsPath),
-      //                 publicFile,
-      //               ))
-      //               // Add the leading "/" indicating the file is being hosted
-      //               // off the root of the application.
-      //               .map(relativePath => `/${relativePath}`),
-      //             );
-      //             return publicFileWebPaths;
-      //           }, []),
-      //         ),
-      //     }),
-      //   ),
-      // ),
     ]),
     module: {
       rules: removeEmpty([
         // JAVASCRIPT
         {
           test: /\.jsx?$/,
-          // We will defer all our js processing to the happypack plugin
-          // named "happypack-javascript".
-          // See the respective plugin within the plugins section for full
-          // details on what loader is being implemented.
           loader: 'happypack/loader?id=happypack-javascript',
           include: removeEmpty([
             ...bundleConfig.srcPaths.map(srcPath =>
               path.resolve(appRootDir.get(), srcPath),
             ),
-            // ifProdClient(path.resolve(appRootDir.get(), 'src/html')),
           ]),
         },
 
         // CSS
-        // This is bound to our server/client bundles as we only expect to be
-        // serving the client bundle as a Single Page Application through the
-        // server.
-        ifElse(isClient || isServer)(
+        ifElse(isClient || isNode)(
           merge(
             {
               test: /\.(css|sass|scss)$/,
             },
-            // For development clients we will defer all our css processing to the
-            // happypack plugin named "happypack-devclient-css".
-            // See the respective plugin within the plugins section for full
-            // details on what loader is being implemented.
             ifDevClient({
               loaders: ['happypack/loader?id=happypack-devclient-css'],
             }),
-            // For a production client build we use the ExtractTextPlugin which
-            // will extract our CSS into CSS files. We don't use happypack here
-            // as there are some edge cases where it fails when used within
-            // an ExtractTextPlugin instance.
-            // Note: The ExtractTextPlugin needs to be registered within the
-            // plugins section too.
             ifProdClient(() => ({
               loader: ExtractTextPlugin.extract({
                 fallback: 'style-loader',
@@ -649,8 +412,6 @@ export default function webpackConfigFactory(buildOptions) {
                 ],
               }),
             })),
-            // When targetting the server we use the "/locals" version of the
-            // css loader, as we don't need any css files for the server.
             ifNode({
               loaders: ['css-loader/locals'],
             }),
@@ -664,10 +425,7 @@ export default function webpackConfigFactory(buildOptions) {
         },
 
         // ASSETS (Images/Fonts/etc)
-        // This is bound to our server/client bundles as we only expect to be
-        // serving the client bundle as a Single Page Application through the
-        // server.
-        ifElse(isClient || isServer)(() => ({
+        ifElse(isClient || isNode)(() => ({
           test: new RegExp(`\\.(${config.bundleAssetTypes.join('|')})$`, 'i'),
           loader: 'file-loader',
           query: {
