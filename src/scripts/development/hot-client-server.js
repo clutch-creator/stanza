@@ -8,10 +8,60 @@ import ListenerManager from './listener-manager';
 import { log } from '../../utils';
 import config from '../../config';
 
-class HotClientServer {
-  constructor(compiler) {
+export default class HotClientServer {
+  constructor(bundle) {
+    this.name = bundle.name.toUpperCase();
+    this.bundle = bundle;
+
+    if (bundle.bundleConfig.webPath) {
+      this.serveStrategy();
+    } else {
+      this.buildOnlyStrategy();
+    }
+
+    this.commonStrategy();
+  }
+
+  commonStrategy() {
+    const { compiler } = this.bundle;
     let initial = true;
+
+    compiler.plugin('compile', () => {
+      if (!initial) {
+        log({
+          title: `[${this.name}]`,
+          level: 'info',
+          message: 'Building new bundle...',
+        });
+      }
+    });
+
+    compiler.plugin('done', (stats) => {
+      if (stats.hasErrors()) {
+        log({
+          title: `[${this.name}]`,
+          level: 'error',
+          message: 'Build failed, please check the console for more information.',
+          notify: true,
+        });
+        console.error(stats.toString());
+      } else {
+        log({
+          title: `[${this.name}]`,
+          level: 'info',
+          message: '✨  Successfuly rebuilt.',
+          notify: true,
+        });
+      }
+
+      initial = false;
+    });
+  }
+
+  serveStrategy() {
+    const { compiler, bundleConfig } = this.bundle;
     const app = express();
+    let initial = true;
 
     const httpPathRegex = /^https?:\/\/(.*):([\d]{1,5})/i;
     const httpPath = compiler.options.output.publicPath;
@@ -43,8 +93,8 @@ class HotClientServer {
 
     // Configure serving dll
     app.use(
-      config.bundles.client.webPath,
-      express.static(path.resolve(appRootDir.get(), config.bundles.client.outputPath)),
+      bundleConfig.webPath,
+      express.static(path.resolve(appRootDir.get(), bundleConfig.outputPath)),
     );
 
     // Configure serving static files
@@ -57,7 +107,7 @@ class HotClientServer {
     const listener = app.listen(port, host, (err) => {
       if (err) {
         log({
-          title: '[CLIENT]',
+          title: `[${this.name}]`,
           level: 'error',
           message: 'Error starting client server',
         });
@@ -66,37 +116,10 @@ class HotClientServer {
 
     this.listenerManager = new ListenerManager(listener, 'client');
 
-    compiler.plugin('compile', () => {
-      if (!initial) {
-        log({
-          title: '[CLIENT]',
-          level: 'info',
-          message: 'Building new bundle...',
-        });
-      }
-    });
-
-    compiler.plugin('done', (stats) => {
-      if (stats.hasErrors()) {
-        log({
-          title: '[CLIENT]',
-          level: 'error',
-          message: 'Build failed, please check the console for more information.',
-          notify: true,
-        });
-        console.error(stats.toString());
-      } else {
-        log({
-          title: '[CLIENT]',
-          level: 'info',
-          message: '✨  Running with latest changes.',
-          notify: true,
-        });
-      }
-
+    compiler.plugin('done', () => {
       if (initial) {
         log({
-          title: '[CLIENT]',
+          title: `[${this.name}]`,
           level: 'info',
           message: `Client served at http://${host}:${port}`,
         });
@@ -104,6 +127,14 @@ class HotClientServer {
 
       initial = false;
     });
+  }
+
+  buildOnlyStrategy() {
+    const { compiler } = this.bundle;
+
+    compiler.watch({
+      ignored: /node_modules/,
+    }, () => undefined);
   }
 
   dispose() {
@@ -114,5 +145,3 @@ class HotClientServer {
       : Promise.resolve();
   }
 }
-
-export default HotClientServer;

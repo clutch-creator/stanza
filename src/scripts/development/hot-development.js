@@ -2,137 +2,148 @@ import { resolve as pathResolve } from 'path';
 import webpack from 'webpack';
 import appRootDir from 'app-root-dir';
 import { log } from '../../utils';
+import webpackConfigFactory from '../../webpack/configFactory';
+import config from '../../config';
 import HotNodeServer from './hot-node-server';
 import HotClientServer from './hot-client-server';
 import createVendorDLL from './create-vendor-dll';
-import webpackConfigFactory from '../../webpack/configFactory';
-import config from '../../config';
 
-const usesDevVendorDLL = bundleConfig =>
-  bundleConfig.devVendorDLL != null && bundleConfig.devVendorDLL.enabled;
+const bundlesNames = Object.keys(config.bundles);
+const NUM_INI_STEPS = 3;
 
-const NUM_INI_STEPS = usesDevVendorDLL(config.bundles.client) ? 4 : 3;
-
-const initializeBundle = (name, bundleConfig) => {
-  const webpackConfig = webpackConfigFactory({
-    target: name,
-    mode: 'development',
-  });
-
-  // Install the vendor DLL config for the client bundle if required.
-  if (name === 'client' && usesDevVendorDLL(bundleConfig)) {
-    // Install the vendor DLL plugin.
-    webpackConfig.plugins.push(
-      new webpack.DllReferencePlugin({
-        // $FlowFixMe
-        manifest: require(
-          pathResolve(
-            appRootDir.get(),
-            bundleConfig.outputPath,
-            `${bundleConfig.devVendorDLL.name}.json`,
-          ),
-        ),
-      }),
-    );
-  }
-
-  return {
-    name,
-    bundleConfig,
-    compiler: webpack(webpackConfig),
-  };
-};
-
-class HotDevelopment {
+/**
+ * Hot Development class starts and manages the entire build process
+ */
+export default class HotDevelopment {
   constructor() {
-    let step = 1;
-
-    this.hotClientServer = null;
+    this.hotClientServers = [];
     this.hotNodeServers = [];
 
-    let clientBundle;
-    let nodeBundles;
+    this.init();
+  }
 
-    Promise.resolve()
-      .then(() => {
-        let result = true;
+  async init() {
+    // step 1 -> generate dlls
+    await this.generateDlls();
 
-        if (usesDevVendorDLL(config.bundles.client)) {
-          log({
-            title: `[${step}/${NUM_INI_STEPS}]`,
-            message: '📦  Creating vendor DLLs...',
-          });
-          step += 1;
+    // step 2 -> generating bundles compilers
+    const bundles = await this.generateCompilers();
 
-          result = createVendorDLL('client', config.bundles.client);
-        }
+    // step 3 -> building bundles
+    this.build(bundles);
+  }
 
-        return result;
-      })
-      .catch((err) => {
-        log({
-          level: 'error',
-          message: 'Unfortunately an error occured whilst trying to build the vendor dll(s) used by the development server. Please check the console for more information.',
-          notify: true,
-        });
+  async generateDlls() {
+    const promises = [];
+    let result;
 
-        if (err) {
-          console.error(err);
-        }
-      })
-      .then(() => {
-        log({
-          title: `[${step}/${NUM_INI_STEPS}]`,
-          message: '🔍  Calculating client compiler...',
-        });
-        step += 1;
+    log({
+      title: `[1/${NUM_INI_STEPS}]`,
+      message: '📦  Creating vendor DLLs...',
+    });
 
-        return initializeBundle('client', config.bundles.client);
-      })
-      .catch((err) => {
+    // check every bundle for dll configs
+    bundlesNames.forEach((bundleName) => {
+      const bundle = config.bundles[bundleName];
+
+      if (bundle.devVendorDLL && bundle.devVendorDLL.enabled) {
+        promises.push(
+          createVendorDLL(bundle),
+        );
+      }
+    });
+
+    try {
+      result = await Promise.all(promises);
+    } catch (err) {
+      log({
+        level: 'error',
+        message: 'Unfortunately an error occured whilst trying to build the vendor dll(s). Please check the console for more information.',
+        notify: true,
+      });
+
+      if (err) {
+        console.error(err);
+      }
+    }
+
+    return result;
+  }
+
+  async generateCompilers() {
+    const bundles = [];
+
+    log({
+      title: `[2/${NUM_INI_STEPS}]`,
+      message: '🔍  Generating bundles compilers...',
+    });
+
+    bundlesNames.forEach((bundleName) => {
+      const bundleConfig = config.bundles[bundleName];
+
+      try {
+        bundles.push(
+          this.initializeBundle(bundleName, bundleConfig),
+        );
+      } catch (err) {
         log({
           level: 'error',
           message: 'Client webpack config is invalid, please check the console for more information.',
           notify: true,
         });
-        console.error(err);
-      })
-      .then((bundle) => {
-        clientBundle = bundle;
+      }
+    });
 
-        log({
-          title: `[${step}/${NUM_INI_STEPS}]`,
-          message: '🔍  Calculating server compiler...',
-        });
-        step += 1;
+    return bundles;
+  }
 
-        return Promise.all([initializeBundle('server', config.bundles.server)]
-          .concat(Object.keys(config.additionalNodeBundles).map(name =>
-            initializeBundle(name, config.additionalNodeBundles[name]),
-          )),
+  build(bundles) {
+    log({
+      title: `[3/${NUM_INI_STEPS}]`,
+      message: '⌛  Building bundles...',
+    });
+
+    bundles.forEach((bundle) => {
+      const bundleConfig = config.bundles[bundle.name];
+
+      if (bundleConfig.target === 'client') {
+        this.hotClientServers.push(
+          new HotClientServer(bundle),
         );
-      })
-      .catch((err) => {
-        log({
-          level: 'error',
-          message: 'Server webpack config is invalid, please check the console for more information.',
-          notify: true,
-        });
-        console.error(err);
-      })
-      .then((bundles) => {
-        nodeBundles = bundles;
-        log({
-          title: `[${step}/${NUM_INI_STEPS}]`,
-          message: '⌛  Building client and server bundles...',
-        });
+      } else if (bundleConfig.target === 'server') {
+        this.hotNodeServers.push(
+          new HotNodeServer(bundle),
+        );
+      }
+    });
+  }
 
-        this.hotClientServer = new HotClientServer(clientBundle.compiler);
-        this.hotNodeServers = nodeBundles
-          .map(({ name, compiler }) =>
-            new HotNodeServer(name, compiler, clientBundle.compiler),
-          );
-      });
+  initializeBundle(name, bundleConfig) {
+    const webpackConfig = webpackConfigFactory({
+      target: bundleConfig.target,
+      mode: 'development',
+    });
+
+    // Install the vendor DLL config if required.
+    if (bundleConfig.devVendorDLL && bundleConfig.devVendorDLL.enabled) {
+      webpackConfig.plugins.push(
+        new webpack.DllReferencePlugin({
+          manifest: require(
+            pathResolve(
+              appRootDir.get(),
+              bundleConfig.outputPath,
+              `${bundleConfig.devVendorDLL.name}.json`,
+            ),
+          ),
+        }),
+      );
+    }
+
+    return {
+      name,
+      bundleConfig,
+      compiler: webpack(webpackConfig),
+    };
   }
 
   dispose() {
@@ -140,10 +151,7 @@ class HotDevelopment {
       (server ? server.dispose() : Promise.resolve());
 
     // First the hot client server.
-    return safeDisposer(this.hotClientServer)
-      // Then dispose the hot node server(s).
+    return Promise.all(this.hotClientServers.map(safeDisposer))
       .then(() => Promise.all(this.hotNodeServers.map(safeDisposer)));
   }
 }
-
-export default HotDevelopment;

@@ -6,12 +6,14 @@ import HotDevelopment from './hot-development';
 
 process.env.NODE_ENV = 'development';
 
+// start dev bundles building
 let devServer = new HotDevelopment();
 
 // Any changes to our webpack bundleConfigs should restart the development devServer.
 const watcher = chokidar.watch([
-  pathResolve(appRootDir.get(), 'config'),
+  pathResolve(appRootDir.get(), 'stanza', 'index'),
 ]);
+
 watcher.on('ready', () => {
   watcher.on('change', () => {
     log({
@@ -19,6 +21,7 @@ watcher.on('ready', () => {
       level: 'warn',
       message: 'Project build configuration has changed. Restarting the development devServer...',
     });
+
     devServer.dispose().then(() => {
       // Make sure our new webpack bundleConfigs aren't in the module cache.
       Object.keys(require.cache).forEach((modulePath) => {
