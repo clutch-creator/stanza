@@ -13,15 +13,15 @@ process.env.NODE_ENV = 'production';
 // First clear the build output dir.
 rimraf.sync(pathResolve(appRootDir.get(), config.buildOutputPath));
 
-// Get our "fixed" bundle names
-Object.keys(config.bundles)
-  // And the "additional" bundle names
-  .concat(Object.keys(config.additionalNodeBundles))
-  // And then build them all.
-  .forEach((bundleName) => {
+Object.keys(config.bundles).forEach((bundleName) => {
+    const bundleConfig = config.bundles[bundleName];
     const compiler = webpack(
-      webpackConfigFactory({ target: bundleName, mode: 'production' }),
+      webpackConfigFactory({
+        target: bundleConfig.target,
+        mode: 'production',
+      }),
     );
+
     compiler.run((err, stats) => {
       if (err) {
         console.error(err);
