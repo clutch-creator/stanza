@@ -134,12 +134,6 @@ export default function webpackConfigFactory(buildOptions) {
 
     // Define our entry chunks for our bundle.
     entry: {
-      // We name our entry files "index" as it makes it easier for us to
-      // target specific bundle output files as each bundle output will get
-      // an output path similar to:
-      //   ./build/server/index.js
-      // This makes importing of the output module as simple as:
-      //   import server from './build/server';
       index: removeEmpty([
         // This grants us source map support, which combined with our webpack
         // source maps will give us nice stack traces for our node executed
