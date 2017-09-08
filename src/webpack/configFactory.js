@@ -67,10 +67,10 @@ export default function webpackConfigFactory(buildOptions) {
     // Ensure that webpack polyfills the following node features for use
     // within any bundles that are targetting node as a runtime. This will be
     // ignored otherwise.
-    node: {
+    node: Object.assign({
       __dirname: true,
       __filename: true,
-    },
+    }, bundleConfig.node),
 
     // We don't want our node_modules to be bundled with any bundle that is
     // targetting the node environment, prefering them to be resolved via
@@ -224,7 +224,7 @@ export default function webpackConfigFactory(buildOptions) {
       ifDev(() => new webpack.NoEmitOnErrorsPlugin()),
 
       // We need this plugin to enable hot reloading of our client.
-      ifDevClient(() => new webpack.HotModuleReplacementPlugin()),
+      ifDevServeClient(() => new webpack.HotModuleReplacementPlugin()),
 
       // For our production client we need to make sure we pass the required
       // configuration to ensure that the output is minimized/optimized.
