@@ -24,7 +24,7 @@ import config, { clientConfig } from '../config';
  * level of abstraction to keep the config factory as simple as possible.
  */
 export default function webpackConfigFactory(buildOptions) {
-  const { target, mode } = buildOptions;
+  const { target, mode, bundleConfig } = buildOptions;
 
   // mode
   const isDev = mode === 'development';
@@ -41,6 +41,7 @@ export default function webpackConfigFactory(buildOptions) {
   // Preconfigure some ifElse helper instnaces. See the util docs for more
   // information on how this util works.
   const ifDevClient = ifElse(isDev && isClient);
+  const ifDevServeClient = ifElse(isDev && isClient && bundleConfig.webPath);
   const ifProdClient = ifElse(isProd && isClient);
 
   let clientEnvVariables = {
@@ -51,13 +52,6 @@ export default function webpackConfigFactory(buildOptions) {
   };
 
   clientEnvVariables = config.plugins.envConfig(clientEnvVariables);
-
-  // Resolve the bundle configuration.
-  const bundleConfig = isNode || isClient
-    // This is either our "server" or "client" bundle.
-    ? config.bundles[target]
-    // Otherwise it must be an additional node bundle.
-    : config.additionalNodeBundles[target];
 
   if (!bundleConfig) {
     throw new Error('No bundle configuration exists for target:', target);
@@ -140,9 +134,9 @@ export default function webpackConfigFactory(buildOptions) {
         // bundles.
         ifNode('source-map-support/register'),
         // Required to support hot reloading of our client.
-        ifDevClient('react-hot-loader/patch'),
+        ifDevServeClient('react-hot-loader/patch'),
         // Required to support hot reloading of our client.
-        ifDevClient(() => `webpack-hot-middleware/client?reload=true&path=http://${config.host}:${config.clientDevServerPort}/__webpack_hmr`),
+        ifDevServeClient(() => `webpack-hot-middleware/client?reload=true&path=http://${config.host}:${config.clientDevServerPort}/__webpack_hmr`),
         // We are using polyfill.io instead of the very heavy babel-polyfill.
         // Therefore we need to add the regenerator-runtime as the babel-polyfill
         // included this, which polyfill.io doesn't include.
@@ -180,11 +174,11 @@ export default function webpackConfigFactory(buildOptions) {
       // be considered as being served from.
       // We only need to set this for our server/client bundles as the server
       // bundle is the application that serves the client bundle.
-      ifElse(isNode || isClient)(() => ({
+      ifElse((isNode || isClient) && bundleConfig.webPath)(() => ({
         publicPath: ifDev(
           // As we run a seperate development server for our client and server
           // bundles we need to use an absolute http path for the public path.
-          `http://${config.host}:${config.clientDevServerPort}${config.bundles.client.webPath}`,
+          `http://${config.host}:${config.clientDevServerPort}${bundleConfig.webPath}`,
           // Otherwise we expect our bundled client to be served from this path.
           bundleConfig.webPath,
         ),
@@ -302,7 +296,7 @@ export default function webpackConfigFactory(buildOptions) {
               plugins: [
                 'transform-decorators-legacy',
                 // Required to support react hot loader.
-                ifDevClient('react-hot-loader/babel'),
+                ifDevServeClient('react-hot-loader/babel'),
                 // This decorates our components with  __self prop to JSX elements,
                 // which React will use to generate some runtime warnings.
                 ifDev('transform-react-jsx-self'),
@@ -341,32 +335,32 @@ export default function webpackConfigFactory(buildOptions) {
       // -----------------------------------------------------------------------
 
       // Client HTML
-      ifClient(
-        () => new HtmlWebpackPlugin({
-          filename: 'index.html',
-          template: path.resolve(__dirname, 'html-page'),
-          minify: {
-            removeComments: true,
-            collapseWhitespace: true,
-            removeRedundantAttributes: true,
-            useShortDoctype: true,
-            removeEmptyAttributes: true,
-            removeStyleLinkTypeAttributes: true,
-            keepClosingSlash: true,
-            minifyJS: true,
-            minifyCSS: true,
-            minifyURLs: true,
-          },
-          inject: true,
-          // We pass our config objects as values as they will be needed
-          // by the template.
-          custom: {
-            config,
-            clientConfig,
-          },
-        }),
-      ),
+      ifElse(isClient && bundleConfig.htmlPage)(() => new HtmlWebpackPlugin({
+        filename: 'index.html',
+        template: path.resolve(__dirname, 'html-page'),
+        minify: {
+          removeComments: true,
+          collapseWhitespace: true,
+          removeRedundantAttributes: true,
+          useShortDoctype: true,
+          removeEmptyAttributes: true,
+          removeStyleLinkTypeAttributes: true,
+          keepClosingSlash: true,
+          minifyJS: true,
+          minifyCSS: true,
+          minifyURLs: true,
+        },
+        inject: true,
+        // We pass our config objects as values as they will be needed
+        // by the template.
+        custom: {
+          config,
+          bundleConfig,
+          clientConfig,
+        },
+      })),
     ]),
+
     module: {
       rules: removeEmpty([
         // JAVASCRIPT
@@ -419,7 +413,7 @@ export default function webpackConfigFactory(buildOptions) {
         },
 
         // ASSETS (Images/Fonts/etc)
-        ifElse(isClient || isNode)(() => ({
+        ifElse((isClient || isNode) && bundleConfig.webPath)(() => ({
           test: new RegExp(`\\.(${config.bundleAssetTypes.join('|')})$`, 'i'),
           loader: 'file-loader',
           query: {
@@ -430,9 +424,9 @@ export default function webpackConfigFactory(buildOptions) {
             publicPath: isDev
               // When running in dev mode the client bundle runs on a
               // seperate port so we need to put an absolute path here.
-              ? `http://${config.host}:${config.clientDevServerPort}${config.bundles.client.webPath}`
+              ? `http://${config.host}:${config.clientDevServerPort}${bundleConfig.webPath}`
               // Otherwise we just use the configured web path for the client.
-              : config.bundles.client.webPath,
+              : bundleConfig.webPath,
             // We only emit files when building a web bundle, for the server
             // bundle we only care about the file loader being able to create
             // the correct asset URLs.

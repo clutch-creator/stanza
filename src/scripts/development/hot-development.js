@@ -47,6 +47,11 @@ export default class HotDevelopment {
       const bundle = config.bundles[bundleName];
 
       if (bundle.devVendorDLL && bundle.devVendorDLL.enabled) {
+        log({
+          title: `[${bundleName}]`,
+          message: 'creating dlls',
+        });
+
         promises.push(
           createVendorDLL(bundle),
         );
@@ -82,6 +87,11 @@ export default class HotDevelopment {
       const bundleConfig = config.bundles[bundleName];
 
       try {
+        log({
+          title: `[${bundleName}]`,
+          message: 'generating compiler',
+        });
+
         bundles.push(
           this.initializeBundle(bundleName, bundleConfig),
         );
@@ -104,7 +114,7 @@ export default class HotDevelopment {
     });
 
     bundles.forEach((bundle) => {
-      const bundleConfig = config.bundles[bundle.name];
+      const { bundleConfig } = bundle;
 
       if (bundleConfig.target === 'client') {
         this.hotClientServers.push(
@@ -122,6 +132,7 @@ export default class HotDevelopment {
     const webpackConfig = webpackConfigFactory({
       target: bundleConfig.target,
       mode: 'development',
+      bundleConfig,
     });
 
     // Install the vendor DLL config if required.
