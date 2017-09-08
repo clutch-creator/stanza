@@ -138,7 +138,9 @@ export default class HotClientServer {
   }
 
   dispose() {
-    this.webpackDevMiddleware.close();
+    if (this.webpackDevMiddleware) {
+      this.webpackDevMiddleware.close();
+    }
 
     return this.listenerManager
       ? this.listenerManager.dispose()
