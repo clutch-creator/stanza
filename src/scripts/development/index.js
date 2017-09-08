@@ -11,7 +11,7 @@ let devServer = new HotDevelopment();
 
 // Any changes to our webpack bundleConfigs should restart the development devServer.
 const watcher = chokidar.watch([
-  pathResolve(appRootDir.get(), 'stanza', 'index'),
+  pathResolve(appRootDir.get(), 'stanza', 'index.js'),
 ]);
 
 watcher.on('ready', () => {
