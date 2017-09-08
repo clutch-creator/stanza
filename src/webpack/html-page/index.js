@@ -28,15 +28,16 @@ const scriptTag = url => `<script type="text/javascript" src="${url}"></script>`
 
 // $FlowFixMe - flow annotations don't work here :(
 export default function generate(templateParams) {
-  const { config, clientConfig } = templateParams.htmlWebpackPlugin.options.custom;
+  const { config, bundleConfig, clientConfig } = templateParams.htmlWebpackPlugin.options.custom;
+  const { htmlPage, webPath, devVendorDLL } = bundleConfig;
 
   return `
     <!DOCTYPE html>
-    <html ${htmlAttributes(config.htmlPage.htmlAttributes)}>
+    <html ${htmlAttributes(htmlPage.htmlAttributes)}>
       <head>
-        <title>${config.htmlPage.defaultTitle}</title>
-        ${metaTags(config.htmlPage.meta)}
-        ${linkTags(config.htmlPage.links)}
+        <title>${htmlPage.defaultTitle}</title>
+        ${metaTags(htmlPage.meta)}
+        ${linkTags(htmlPage.links)}
       </head>
       <body>
         <div id='root'></div>
@@ -61,12 +62,11 @@ export default function generate(templateParams) {
           // vendor DLL in order to dramatically reduce our compilation times.  Therefore
           // we need to inject the path to the vendor dll bundle below.
           // @see /tools/development/ensureVendorDLLExists.js
-          process.env.NODE_ENV === 'development'
-            && config.bundles.client.devVendorDLL.enabled
-            ? scriptTag(`${config.bundles.client.webPath}${config.bundles.client.devVendorDLL.name}.js`)
-            : ''
+          process.env.NODE_ENV === 'development' && devVendorDLL && devVendorDLL.enabled ?
+            scriptTag(`${webPath}${devVendorDLL.name}.js`) :
+            ''
         }
-        ${scriptTags(config.htmlPage.scripts)}
+        ${scriptTags(htmlPage.scripts)}
       </body>
     </html>`;
 }
