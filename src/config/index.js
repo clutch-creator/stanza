@@ -91,26 +91,6 @@ let config = {
     url: 'https://cdn.polyfill.io/v2/polyfill.min.js',
   },
 
-  // Configuration for the HTML pages (headers/titles/scripts/css/etc).
-  // We make use of react-helmet to consume the values below.
-  // @see https://github.com/nfl/react-helmet
-  htmlPage: {
-    htmlAttributes: { lang: 'en' },
-    titleTemplate: 'Stanzarize - %s',
-    defaultTitle: 'Stanzarize',
-    meta: [],
-    links: [
-      // When building a progressive web application you need to supply
-      // a manifest.json as well as a variety of icon types. This can be
-      // tricky. Luckily there is a service to help you with this.
-      // http://realfavicongenerator.net/
-    ],
-    scripts: [
-      // Example:
-      // { src: 'http://include.com/pathtojs.js', type: 'text/javascript' },
-    ],
-  },
-
   bundles: {
     client: {
       target: 'client',
@@ -158,6 +138,26 @@ let config = {
 
         // The name of the vendor DLL.
         name: '__dev_vendor_dll__',
+      },
+
+      // Configuration for the HTML pages (headers/titles/scripts/css/etc).
+      // We make use of react-helmet to consume the values below.
+      // @see https://github.com/nfl/react-helmet
+      htmlPage: {
+        htmlAttributes: { lang: 'en' },
+        titleTemplate: 'Stanzarize - %s',
+        defaultTitle: 'Stanzarize',
+        meta: [],
+        links: [
+          // When building a progressive web application you need to supply
+          // a manifest.json as well as a variety of icon types. This can be
+          // tricky. Luckily there is a service to help you with this.
+          // http://realfavicongenerator.net/
+        ],
+        scripts: [
+          // Example:
+          // { src: 'http://include.com/pathtojs.js', type: 'text/javascript' },
+        ],
       },
     },
     server: {
