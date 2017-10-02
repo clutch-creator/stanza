@@ -8,7 +8,11 @@ const htmlAttributes = attrs => Object.keys(attrs)
 // tags array deserialization
 const insertTags = tags =>
   tags
-    .map(tag => `<${tag.tag} ${htmlAttributes(tag.attributes)}>${tag.content}</${tag.tag}>`)
+    .map(tag => `<${tag.tag} ${htmlAttributes(tag.attributes)}>${
+      (tag.tag !== 'meta' && tag.tag !== 'link') ?
+      `${tag.content}</${tag.tag}>` :
+      ''
+    }`)
     .join(' ');
 
 // script tag deserialization from url
