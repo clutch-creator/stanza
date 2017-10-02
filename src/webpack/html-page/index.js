@@ -1,32 +1,19 @@
-// This is used by the HtmlWebpackPlugin to generate an html page that we will
-// use as a fallback for our service worker when the user is offline.  It will
-// embed all the required asset paths needed to bootstrap the application
-// in an offline session.
-//
-// You must keep this in sync in terms of structure etc with the output generated
-// by the reactApplication middleware.
-// @see src/server/middleware/reactApplication/generateHTML.js
-
 import serialize from 'serialize-javascript';
 
+// html attributes deserialization
 const htmlAttributes = attrs => Object.keys(attrs)
   .map(attrName => `${attrName}="${attrs[attrName]}"`)
   .join(' ');
 
-const metaTags = metas =>
-  metas.map(metaItem => `<meta ${htmlAttributes(metaItem)}>`).join(' ');
-
-const linkTags = links =>
-  links.map(linkItem => `<link ${htmlAttributes(linkItem)}>`).join(' ');
-
-const scriptTags = scripts =>
-  scripts
-    .map(scriptItem => `<script ${htmlAttributes(scriptItem)}></script>`)
+// tags array deserialization
+const insertTags = tags =>
+  tags
+    .map(tag => `<${tag.tag} ${htmlAttributes(tag.attributes)}>${tag.content}</${tag.tag}>`)
     .join(' ');
 
+// script tag deserialization from url
 const scriptTag = url => `<script type="text/javascript" src="${url}"></script>`;
 
-// $FlowFixMe - flow annotations don't work here :(
 export default function generate(templateParams) {
   const { config, bundleConfig, clientConfig } = templateParams.htmlWebpackPlugin.options.custom;
   const { htmlPage, webPath, devVendorDLL } = bundleConfig;
@@ -36,8 +23,7 @@ export default function generate(templateParams) {
     <html ${htmlAttributes(htmlPage.htmlAttributes)}>
       <head>
         <title>${htmlPage.defaultTitle}</title>
-        ${metaTags(htmlPage.meta)}
-        ${linkTags(htmlPage.links)}
+        ${insertTags(htmlPage.header)}
       </head>
       <body>
         <div id='root'></div>
@@ -66,7 +52,7 @@ export default function generate(templateParams) {
             scriptTag(`${webPath}${devVendorDLL.name}.js`) :
             ''
         }
-        ${scriptTags(htmlPage.scripts)}
+        ${insertTags(htmlPage.footer)}
       </body>
     </html>`;
 }
