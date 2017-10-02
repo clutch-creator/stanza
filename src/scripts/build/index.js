@@ -19,6 +19,7 @@ Object.keys(config.bundles).forEach((bundleName) => {
       webpackConfigFactory({
         target: bundleConfig.target,
         mode: 'production',
+        bundleConfig,
       }),
     );
 
