@@ -1,19 +1,25 @@
 import serialize from 'serialize-javascript';
 
 // html attributes deserialization
-const htmlAttributes = attrs => Object.keys(attrs)
-  .map(attrName => `${attrName}="${attrs[attrName]}"`)
-  .join(' ');
+const htmlAttributes = attrs => (
+  attrs ?
+  Object.keys(attrs)
+    .map(attrName => `${attrName}="${attrs[attrName]}"`)
+    .join(' ') :
+  ''
+);
 
 // tags array deserialization
-const insertTags = tags =>
-  tags
-    .map(tag => `<${tag.tag} ${htmlAttributes(tag.attributes)}>${
+const insertTags = tags => (
+  tags ?
+  tags.map(tag => `<${tag.tag} ${htmlAttributes(tag.attributes)}>${
       (tag.tag !== 'meta' && tag.tag !== 'link') ?
       `${tag.content}</${tag.tag}>` :
       ''
     }`)
-    .join(' ');
+    .join(' ') :
+  ''
+);
 
 // script tag deserialization from url
 const scriptTag = url => `<script type="text/javascript" src="${url}"></script>`;
