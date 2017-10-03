@@ -1,7 +1,7 @@
 import jest from 'jest';
 import createConfig from '../../jest/create-config';
 
-export default (watch, noCoverage = false) => {
+export default (watch, noCoverage = false, inBand = false) => {
   process.env.NODE_ENV = 'test';
 
   const argv = [];
@@ -12,6 +12,10 @@ export default (watch, noCoverage = false) => {
     argv.push('--notify');
   } else {
     argv.push('--forceExit');
+  }
+
+  if (inBand) {
+    argv.push('--runInBand');
   }
 
   // add config

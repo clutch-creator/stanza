@@ -24,6 +24,12 @@ switch (cmdValue) {
   case 'test':
     require('../dist/scripts/test').default();
     break;
+  case 'test-band':
+    require('../dist/scripts/test').default(false, false, true);
+    break;
+  case 'test-band-no-coverage':
+    require('../dist/scripts/test').default(false, true, true);
+    break;
   case 'test-watch':
     require('../dist/scripts/test').default(true);
     break;
