@@ -288,9 +288,8 @@ export default function webpackConfigFactory(buildOptions) {
 
               presets: [
                 'react',
-                ifClient(['latest', { es2015: { modules: false } }]),
+                ['env', { targets: { node: isNode }, modules: false }],
                 'stage-0',
-                ifNode(['env', { targets: { node: true }, modules: false }]),
               ].filter(x => x != null),
 
               plugins: [
