@@ -3,7 +3,7 @@ import babelJest from 'babel-jest';
 module.exports = babelJest.createTransformer({
   presets: [
     'react',
-    ['es2015', { modules: false }],
+    ['env', { modules: false }],
     'stage-0',
   ],
   plugins: [

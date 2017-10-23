@@ -295,14 +295,14 @@ export default function webpackConfigFactory(buildOptions) {
 
               plugins: [
                 'transform-decorators-legacy',
-                // Required to support react hot loader.
-                ifDevServeClient('react-hot-loader/babel'),
                 // This decorates our components with  __self prop to JSX elements,
                 // which React will use to generate some runtime warnings.
                 ifDev('transform-react-jsx-self'),
                 // Adding this will give us the path to our components in the
                 // react dev tools.
                 ifDev('transform-react-jsx-source'),
+                // Required to support react hot loader.
+                ifDevServeClient('react-hot-loader/babel'),
               ].filter(x => x != null),
             },
             buildOptions,
