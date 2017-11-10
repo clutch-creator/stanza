@@ -1,4 +1,5 @@
 // This script builds a production output of all of our bundles.
+process.env.NODE_ENV = 'production';
 
 import webpack from 'webpack';
 import appRootDir from 'app-root-dir';
@@ -7,8 +8,6 @@ import rimraf from 'rimraf';
 import webpackConfigFactory from '../../webpack/configFactory';
 import { exec } from '../../utils';
 import config from '../../config';
-
-process.env.NODE_ENV = 'production';
 
 // First clear the build output dir.
 rimraf.sync(pathResolve(appRootDir.get(), config.buildOutputPath));
