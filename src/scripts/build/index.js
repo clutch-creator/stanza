@@ -1,6 +1,4 @@
 // This script builds a production output of all of our bundles.
-process.env.NODE_ENV = 'production';
-
 import webpack from 'webpack';
 import appRootDir from 'app-root-dir';
 import { resolve as pathResolve } from 'path';

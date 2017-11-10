@@ -19,6 +19,7 @@ if (typeof cmdValue === 'undefined') {
 
 switch (cmdValue) {
   case 'development':
+    process.env.NODE_ENV = 'development';
     require('../dist/scripts/development');
     break;
   case 'test':
@@ -46,6 +47,7 @@ switch (cmdValue) {
     require('../dist/scripts/analyze');
     break;
   case 'build':
+    process.env.NODE_ENV = 'production';
     require('../dist/scripts/build');
     break;
   case 'clean':
