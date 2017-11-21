@@ -412,6 +412,14 @@ export default function webpackConfigFactory(buildOptions) {
           loaders: ['graphql-tag/loader'],
         },
 
+        {
+          test: /\.svg$/,
+          use: [
+            'svg-sprite-loader',
+            'svgo-loader',
+          ],
+        },
+
         // ASSETS (Images/Fonts/etc)
         ifElse((isClient || isNode) && bundleConfig.webPath)(() => ({
           test: new RegExp(`\\.(${config.bundleAssetTypes.join('|')})$`, 'i'),

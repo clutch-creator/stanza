@@ -57,7 +57,7 @@ let config = {
     'gif',
     'ico',
     'eot',
-    'svg',
+    // 'svg',
     'ttf',
     'woff',
     'woff2',
