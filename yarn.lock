@@ -2462,9 +2462,9 @@ eslint-config-airbnb@^16.1.0:
   dependencies:
     eslint-config-airbnb-base "^12.1.0"
 
-eslint-config-stanza@^1.1.4:
-  version "1.1.4"
-  resolved "https://registry.yarnpkg.com/eslint-config-stanza/-/eslint-config-stanza-1.1.4.tgz#f27ccbb89764583d09c06967db176969b9ab56d9"
+eslint-config-stanza@^1.1.5:
+  version "1.1.5"
+  resolved "https://registry.yarnpkg.com/eslint-config-stanza/-/eslint-config-stanza-1.1.5.tgz#92a214a0144432e5314ab86b85b9589ed829cb32"
   dependencies:
     babel-eslint "^8.0.2"
     eslint "git+ssh://git@github.com:bruno12mota/eslint.git#add/define-parser"
@@ -2552,9 +2552,10 @@ eslint-scope@^3.7.1:
     esrecurse "^4.1.0"
     estraverse "^4.1.1"
 
-eslint@^4.9.0:
+"eslint@git+ssh://git@github.com/bruno12mota/eslint.git#add/define-parser":
   version "4.11.0"
-  resolved "https://registry.yarnpkg.com/eslint/-/eslint-4.11.0.tgz#39a8c82bc0a3783adf5a39fa27fdd9d36fac9a34"
+  uid "10e254655218792ca46440fb6aee8f3f08f84a5a"
+  resolved "git+ssh://git@github.com/bruno12mota/eslint.git#10e254655218792ca46440fb6aee8f3f08f84a5a"
   dependencies:
     ajv "^5.3.0"
     babel-code-frame "^6.22.0"
