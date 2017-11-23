@@ -10,18 +10,16 @@ function createVendorDLL(bundleConfig) {
   // $FlowFixMe
   const pkg = require(pathResolve(appRootDir.get(), './package.json'));
 
-  const devDLLDependencies = dllConfig.include.sort();
+  const devDLLDependencies = dllConfig.include
+    .sort()
+    .filter((elem, pos, arr) => arr.indexOf(elem) === pos)
+  ;
 
   // We calculate a hash of the package.json's dependencies, which we can use
   // to determine if dependencies have changed since the last time we built
   // the vendor dll.
   const currentDependenciesHash = md5(JSON.stringify(
-    devDLLDependencies.map(dep =>
-      // We do this to include any possible version numbers we may have for
-      // a dependency. If these change then our hash should too, which will
-      // result in a new dev dll build.
-      [dep, pkg.dependencies[dep], pkg.devDependencies[dep]],
-    ),
+    devDLLDependencies.map(dep => [dep, pkg.dependencies[dep], pkg.devDependencies[dep]]),
   ));
 
   const vendorDLLHashFilePath = pathResolve(
@@ -64,7 +62,8 @@ function createVendorDLL(bundleConfig) {
           reject(err);
           return;
         }
-          // Update the dependency hash
+
+        // Update the dependency hash
         fs.writeFileSync(vendorDLLHashFilePath, currentDependenciesHash);
 
         resolve();

@@ -11,20 +11,20 @@ import config from '../../config';
 rimraf.sync(pathResolve(appRootDir.get(), config.buildOutputPath));
 
 Object.keys(config.bundles).forEach((bundleName) => {
-    const bundleConfig = config.bundles[bundleName];
-    const compiler = webpack(
-      webpackConfigFactory({
-        target: bundleConfig.target,
-        mode: 'production',
-        bundleConfig,
-      }),
-    );
+  const bundleConfig = config.bundles[bundleName];
+  const compiler = webpack(
+    webpackConfigFactory({
+      target: bundleConfig.target,
+      mode: 'production',
+      bundleConfig,
+    }),
+  );
 
-    compiler.run((err, stats) => {
-      if (err) {
-        console.error(err);
-        return;
-      }
-      console.log(stats.toString({ colors: true }));
-    });
+  compiler.run((err, stats) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    console.log(stats.toString({ colors: true }));
   });
+});
