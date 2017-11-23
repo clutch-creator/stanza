@@ -36,7 +36,7 @@
     "dotenv": "^4.0.0",
     "esdoc": "^1.0.4",
     "eslint": "^4.11.0",
-    "eslint-config-stanza": "^1.1.0",
+    "eslint-config-stanza": "1.1.1",
     "extract-text-webpack-plugin": "^3.0.2",
     "file-loader": "^1.1.5",
     "graphql-tag": "^2.0.0",
@@ -62,7 +62,6 @@
     "webpack-bundle-analyzer": "^2.9.1",
     "webpack-dev-middleware": "^1.12.1",
     "webpack-hot-middleware": "^2.16.1",
-    "webpack-md5-hash": "^0.0.5",
     "webpack-node-externals": "^1.5.4"
   },
   "peerDependencies": {
