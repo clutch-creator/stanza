@@ -196,6 +196,8 @@ export default function webpackConfigFactory(buildOptions) {
     },
 
     plugins: removeEmpty([
+      new webpack.optimize.ModuleConcatenationPlugin(),
+
       // We use this so that our generated [chunkhash]'s are only different if
       // the content for our respective chunks have changed.  This optimises
       // our long term browser caching strategy for our client bundle, avoiding
