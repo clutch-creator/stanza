@@ -196,7 +196,7 @@ export default function webpackConfigFactory(buildOptions) {
     },
 
     plugins: removeEmpty([
-      new webpack.optimize.ModuleConcatenationPlugin(),
+      // new webpack.optimize.ModuleConcatenationPlugin(),
 
       // The DefinePlugin is used by webpack to substitute any patterns that it
       // finds within the code with the respective value assigned below.
