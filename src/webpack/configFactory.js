@@ -78,13 +78,13 @@ export default function webpackConfigFactory(buildOptions) {
     // an  externals config that will ignore all node_modules.
     externals: removeEmpty([
       ifNode(
-        () => nodeExternals(
+        () => bundleConfig.nodeExternals || nodeExternals(
           // Some of our node_modules may contain files that depend on webpack
           // loaders, e.g. CSS or SASS.
           // For these cases please make sure that the file extensions are
           // registered within the following configuration setting.
           {
-            whitelist:
+            whitelist: bundleConfig.whitelist ||
               // We always want the source-map-support excluded.
               ['source-map-support/register'].concat(
                 // Then exclude any items specified in the config.
@@ -284,7 +284,13 @@ export default function webpackConfigFactory(buildOptions) {
               presets: [
                 'react',
                 ifClient(['env', { modules: false }]),
-                ifNode(['env', { targets: { node: 'current' }, modules: false }]),
+                ifNode([
+                  'env',
+                  {
+                    targets: { node: bundleConfig.nodeTarget || 'current' },
+                    modules: false,
+                  },
+                ]),
                 'stage-0',
               ].filter(x => x != null),
 
