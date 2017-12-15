@@ -152,7 +152,7 @@ export default function webpackConfigFactory(buildOptions) {
         // The dir in which our bundle should be output.
         path: path.resolve(appRootDir.get(), bundleConfig.outputPath),
         // The filename format for our bundle's entries.
-        filename: ifProdClient(
+        filename: ifElse(isProd && isClient && !bundleConfig.outputNoHash)(
           // For our production client bundles we include a hash in the filename.
           // That way we won't hit any browser caching issues when our bundle
           // output changes.
