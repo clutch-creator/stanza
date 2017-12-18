@@ -140,7 +140,9 @@ export default function webpackConfigFactory(buildOptions) {
         // We are using polyfill.io instead of the very heavy babel-polyfill.
         // Therefore we need to add the regenerator-runtime as the babel-polyfill
         // included this, which polyfill.io doesn't include.
-        ifClient('regenerator-runtime/runtime'),
+        ifElse(isClient || bundleConfig.includeRegenerator)(
+          'regenerator-runtime/runtime',
+        ),
         // The source entry file for the bundle.
         path.resolve(appRootDir.get(), bundleConfig.srcEntryFile),
       ]),
