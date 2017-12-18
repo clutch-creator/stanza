@@ -1,6 +1,6 @@
 {
   "name": "stanzarize",
-  "version": "2.7.1",
+  "version": "2.7.2",
   "main": "bin/stanza.js",
   "repository": "git@github.com:stanza/stanza.git",
   "author": "Bruno Mota <bruno12mota@gmail.com>",
