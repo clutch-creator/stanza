@@ -3,6 +3,7 @@ import webpack from 'webpack';
 import AssetsPlugin from 'assets-webpack-plugin';
 import nodeExternals from 'webpack-node-externals';
 import ExtractTextPlugin from 'extract-text-webpack-plugin';
+import UglifyJsPlugin from 'uglifyjs-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import appRootDir from 'app-root-dir';
 import { removeEmpty, ifElse, merge, happyPackPlugin } from '../utils';
@@ -235,18 +236,15 @@ export default function webpackConfigFactory(buildOptions) {
       // configuration to ensure that the output is minimized/optimized.
       ifProdClient(
         ifElse(config.optimizeProductionBuilds)(
-          () => new webpack.optimize.UglifyJsPlugin({
+          () => new UglifyJsPlugin({
             sourceMap: config.includeSourceMapsForProductionBuilds,
-            compress: {
-              screw_ie8: true,
+            parallel: true,
+            uglifyOptions: {
+              ie8: false,
+              output: {
+                comments: false,
+              },
               warnings: false,
-            },
-            mangle: {
-              screw_ie8: true,
-            },
-            output: {
-              comments: false,
-              screw_ie8: true,
             },
           }),
         ),
