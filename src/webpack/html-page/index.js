@@ -30,6 +30,7 @@ export default function generate(templateParams) {
     <html ${htmlAttributes(htmlPage.htmlAttributes)}>
       <head>
         <title>${htmlPage.defaultTitle}</title>
+        <meta charset="utf-8" >
         ${insertTags(htmlPage.header)}
       </head>
       <body>
