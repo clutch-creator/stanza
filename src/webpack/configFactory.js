@@ -3,9 +3,9 @@ import webpack from 'webpack';
 import AssetsPlugin from 'assets-webpack-plugin';
 import nodeExternals from 'webpack-node-externals';
 import ExtractTextPlugin from 'extract-text-webpack-plugin';
+import UglifyJsPlugin from 'uglifyjs-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import appRootDir from 'app-root-dir';
-import WebpackMd5Hash from 'webpack-md5-hash';
 import { removeEmpty, ifElse, merge, happyPackPlugin } from '../utils';
 import config, { clientConfig } from '../config';
 
@@ -30,7 +30,7 @@ export default function webpackConfigFactory(buildOptions) {
   const isDev = mode === 'development';
   const isProd = mode === 'production';
   const ifDev = ifElse(isDev);
-  const ifProd = ifElse(isProd);
+  // const ifProd = ifElse(isProd);
 
   // target
   const isClient = target === 'client';
@@ -79,12 +79,13 @@ export default function webpackConfigFactory(buildOptions) {
     // an  externals config that will ignore all node_modules.
     externals: removeEmpty([
       ifNode(
-        () => nodeExternals(
+        () => bundleConfig.nodeExternals || nodeExternals(
           // Some of our node_modules may contain files that depend on webpack
           // loaders, e.g. CSS or SASS.
           // For these cases please make sure that the file extensions are
           // registered within the following configuration setting.
-          { whitelist:
+          {
+            whitelist: bundleConfig.whitelist ||
               // We always want the source-map-support excluded.
               ['source-map-support/register'].concat(
                 // Then exclude any items specified in the config.
@@ -97,16 +98,16 @@ export default function webpackConfigFactory(buildOptions) {
 
     // Source map settings.
     devtool: ifElse(
-        // Include source maps for ANY node bundle so that we can support
-        // nice stack traces for errors (the source maps get consumed by
-        // the `node-source-map-support` module to allow for this).
-        isNode
-        // Always include source maps for any development build.
-        || isDev
-        // Allow for the following flag to force source maps even for production
-        // builds.
-        || config.includeSourceMapsForProductionBuilds,
-      )(
+      // Include source maps for ANY node bundle so that we can support
+      // nice stack traces for errors (the source maps get consumed by
+      // the `node-source-map-support` module to allow for this).
+      isNode
+      // Always include source maps for any development build.
+      || isDev
+      // Allow for the following flag to force source maps even for production
+      // builds.
+      || config.includeSourceMapsForProductionBuilds,
+    )(
       // Produces an external source map (lives next to bundle output files).
       'inline-cheap-source-map',
       // Produces no source map.
@@ -140,7 +141,9 @@ export default function webpackConfigFactory(buildOptions) {
         // We are using polyfill.io instead of the very heavy babel-polyfill.
         // Therefore we need to add the regenerator-runtime as the babel-polyfill
         // included this, which polyfill.io doesn't include.
-        ifClient('regenerator-runtime/runtime'),
+        ifElse(isClient || bundleConfig.includeRegenerator)(
+          'regenerator-runtime/runtime',
+        ),
         // The source entry file for the bundle.
         path.resolve(appRootDir.get(), bundleConfig.srcEntryFile),
       ]),
@@ -152,21 +155,21 @@ export default function webpackConfigFactory(buildOptions) {
         // The dir in which our bundle should be output.
         path: path.resolve(appRootDir.get(), bundleConfig.outputPath),
         // The filename format for our bundle's entries.
-        filename: ifProdClient(
+        filename: ifElse(isProd && isClient && !bundleConfig.outputNoHash)(
           // For our production client bundles we include a hash in the filename.
           // That way we won't hit any browser caching issues when our bundle
           // output changes.
           // Note: as we are using the WebpackMd5Hash plugin, the hashes will
           // only change when the file contents change. This means we can
           // set very aggressive caching strategies on our bundle output.
-          '[name]-[chunkhash].js',
+          '[name]-[hash].js',
           // For any other bundle (typically a server/node) bundle we want a
           // determinable output name to allow for easier importing/execution
           // of the bundle by our scripts.
           '[name].js',
         ),
         // The name format for any additional chunks produced for the bundle.
-        chunkFilename: '[name]-[chunkhash].js',
+        chunkFilename: '[name]-[hash].js',
         // When in node mode we will output our bundle as a commonjs2 module.
         libraryTarget: ifNode('commonjs2', 'var'),
       },
@@ -196,12 +199,7 @@ export default function webpackConfigFactory(buildOptions) {
     },
 
     plugins: removeEmpty([
-      // We use this so that our generated [chunkhash]'s are only different if
-      // the content for our respective chunks have changed.  This optimises
-      // our long term browser caching strategy for our client bundle, avoiding
-      // cases where browsers end up having to download all the client chunks
-      // even though 1 or 2 may have only changed.
-      ifClient(() => new WebpackMd5Hash()),
+      // new webpack.optimize.ModuleConcatenationPlugin(),
 
       // The DefinePlugin is used by webpack to substitute any patterns that it
       // finds within the code with the respective value assigned below.
@@ -238,18 +236,15 @@ export default function webpackConfigFactory(buildOptions) {
       // configuration to ensure that the output is minimized/optimized.
       ifProdClient(
         ifElse(config.optimizeProductionBuilds)(
-          () => new webpack.optimize.UglifyJsPlugin({
+          () => new UglifyJsPlugin({
             sourceMap: config.includeSourceMapsForProductionBuilds,
-            compress: {
-              screw_ie8: true,
+            parallel: true,
+            uglifyOptions: {
+              ie8: false,
+              output: {
+                comments: false,
+              },
               warnings: false,
-            },
-            mangle: {
-              screw_ie8: true,
-            },
-            output: {
-              comments: false,
-              screw_ie8: true,
             },
           }),
         ),
@@ -259,7 +254,7 @@ export default function webpackConfigFactory(buildOptions) {
       // CSS files.
       ifProdClient(
         () => new ExtractTextPlugin({
-          filename: '[name]-[chunkhash].css', allChunks: true,
+          filename: '[name]-[hash].css', allChunks: true,
         }),
       ),
 
@@ -289,7 +284,13 @@ export default function webpackConfigFactory(buildOptions) {
               presets: [
                 'react',
                 ifClient(['env', { modules: false }]),
-                ifNode(['env', { targets: { node: 'current' }, modules: false }]),
+                ifNode([
+                  'env',
+                  {
+                    targets: { node: bundleConfig.nodeTarget || 'current' },
+                    modules: false,
+                  },
+                ]),
                 'stage-0',
               ].filter(x => x != null),
 

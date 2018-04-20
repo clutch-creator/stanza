@@ -14,6 +14,7 @@ class HotNodeServer {
       this.autoStartStrategy();
     } else {
       this.buildOnlyStrategy();
+      this.commonStrategy();
     }
   }
 
@@ -40,7 +41,7 @@ class HotNodeServer {
         return;
       }
 
-      if (stats.hasErrors()) {
+      if (stats && stats.hasErrors()) {
         log({
           title: name,
           level: 'error',
@@ -48,10 +49,16 @@ class HotNodeServer {
           notify: true,
         });
         console.log(stats.toString());
-        return;
-      }
+      } else {
+        log({
+          title: `[${name}]`,
+          level: 'info',
+          message: '✨  Successfuly rebuilt.',
+          notify: true,
+        });
 
-      initial = false;
+        initial = false;
+      }
     });
   }
 
@@ -142,6 +149,14 @@ class HotNodeServer {
           });
           console.error(err);
         }
+      } else {
+        log({
+          title: name,
+          level: 'error',
+          message: 'Build failed, check the console for more information.',
+          notify: true,
+        });
+        console.log(stats.toString());
       }
     });
 
