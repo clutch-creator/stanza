@@ -97,7 +97,7 @@ export default function webpackConfigFactory(buildOptions) {
     ]),
 
     // Source map settings.
-    devtool: ifElse(
+    devtool: bundleConfig.devtool !== undefined ? bundleConfig.devtool : ifElse(
       // Include source maps for ANY node bundle so that we can support
       // nice stack traces for errors (the source maps get consumed by
       // the `node-source-map-support` module to allow for this).
