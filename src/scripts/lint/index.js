@@ -3,7 +3,7 @@ import { CLIEngine } from 'eslint';
 export default (fix) => {
   const cli = new CLIEngine({
     baseConfig: {
-      extends: ['stanza'],
+      extends: ['stanza', 'prettier'],
     },
     useEslintrc: false,
     extensions: ['.js', '.jsx'],
