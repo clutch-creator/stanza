@@ -109,7 +109,7 @@ export default function webpackConfigFactory(buildOptions) {
       || config.includeSourceMapsForProductionBuilds,
     )(
       // Produces an external source map (lives next to bundle output files).
-      'source-map',
+      'inline-cheap-source-map',
       // Produces no source map.
       'hidden-source-map',
     ),
