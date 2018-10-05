@@ -12,15 +12,20 @@ function createVendorDLL(bundleConfig) {
 
   const devDLLDependencies = dllConfig.include
     .sort()
-    .filter((elem, pos, arr) => arr.indexOf(elem) === pos)
-  ;
+    .filter((elem, pos, arr) => arr.indexOf(elem) === pos);
 
   // We calculate a hash of the package.json's dependencies, which we can use
   // to determine if dependencies have changed since the last time we built
   // the vendor dll.
-  const currentDependenciesHash = md5(JSON.stringify(
-    devDLLDependencies.map(dep => [dep, pkg.dependencies[dep], pkg.devDependencies[dep]]),
-  ));
+  const currentDependenciesHash = md5(
+    JSON.stringify(
+      devDLLDependencies.map((dep) => [
+        dep,
+        pkg.dependencies[dep],
+        pkg.devDependencies[dep],
+      ]),
+    ),
+  );
 
   const vendorDLLHashFilePath = pathResolve(
     appRootDir.get(),
@@ -74,14 +79,18 @@ function createVendorDLL(bundleConfig) {
   return new Promise((resolve, reject) => {
     if (!fs.existsSync(vendorDLLHashFilePath)) {
       // builddll
-      buildVendorDLL().then(resolve).catch(reject);
+      buildVendorDLL()
+        .then(resolve)
+        .catch(reject);
     } else {
       // first check if the md5 hashes match
       const dependenciesHash = fs.readFileSync(vendorDLLHashFilePath, 'utf8');
       const dependenciesChanged = dependenciesHash !== currentDependenciesHash;
 
       if (dependenciesChanged) {
-        buildVendorDLL().then(resolve).catch(reject);
+        buildVendorDLL()
+          .then(resolve)
+          .catch(reject);
       } else {
         resolve();
       }

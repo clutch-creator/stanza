@@ -10,7 +10,7 @@ var exec = require('child_process').exec;
 var existsSync = require('fs').existsSync;
 var pathResolve = require('path').resolve;
 
-if (existsSync(pathResolve(__dirname, '../../node_modules'))){
+if (existsSync(pathResolve(__dirname, '../../node_modules'))) {
   // An install has already occurred.
   process.exit(1);
 }
@@ -24,17 +24,19 @@ function checkNodeVersion() {
       'You are currently running Node %s but %s requires %s. Please use a supported version of Node.\n',
       process.version,
       packageJson.name,
-      packageJson.engines.node
+      packageJson.engines.node,
     );
     process.exit(1);
   }
 }
 
 var packageJson = require('../../package.json');
-if (!packageJson.engines
-  || !packageJson.engines.node
-  || !packageJson.devDependencies
-  || !packageJson.devDependencies.semver) {
+if (
+  !packageJson.engines ||
+  !packageJson.engines.node ||
+  !packageJson.devDependencies ||
+  !packageJson.devDependencies.semver
+) {
   // The package has already been customised. Ignore this script.
   process.exit(1);
 }
@@ -44,5 +46,5 @@ exec(
   function installSemverCb(err, stdout, stderr) {
     if (err) throw err;
     checkNodeVersion();
-  }
-)
+  },
+);

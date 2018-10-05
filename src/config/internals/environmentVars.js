@@ -30,12 +30,17 @@ function registerEnvFile() {
   ];
 
   // Find the first env file path match.
-  const envFilePath = envFileResolutionOrder.find(filePath => fs.existsSync(filePath));
+  const envFilePath = envFileResolutionOrder.find((filePath) =>
+    fs.existsSync(filePath),
+  );
 
   // If we found an env file match the register it.
   if (envFilePath) {
-    console.log( // eslint-disable-line no-console
-      colors.bgBlue.white(`==> Registering environment variables from: ${envFilePath}`),
+    console.log(
+      // eslint-disable-line no-console
+      colors.bgBlue.white(
+        `==> Registering environment variables from: ${envFilePath}`,
+      ),
     );
     dotenv.config({ path: envFilePath });
   }
@@ -50,13 +55,9 @@ export function getStringEnvVar(name, defaultVal) {
 }
 
 export function getIntEnvVar(name, defaultVal) {
-  return process.env[name]
-    ? parseInt(process.env[name], 10)
-    : defaultVal;
+  return process.env[name] ? parseInt(process.env[name], 10) : defaultVal;
 }
 
 export function getBoolVar(name, defaultVal) {
-  return process.env[name]
-    ? process.env[name] === 'true'
-    : defaultVal;
+  return process.env[name] ? process.env[name] === 'true' : defaultVal;
 }

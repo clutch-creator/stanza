@@ -41,7 +41,8 @@ export default class HotClientServer {
         log({
           title: `[${this.name}]`,
           level: 'error',
-          message: 'Build failed, please check the console for more information.',
+          message:
+            'Build failed, please check the console for more information.',
           notify: true,
         });
         console.error(stats.toString());
@@ -87,9 +88,11 @@ export default class HotClientServer {
     });
 
     app.use(this.webpackDevMiddleware);
-    app.use(createWebpackHotMiddleware(compiler, {
-      log: false,
-    }));
+    app.use(
+      createWebpackHotMiddleware(compiler, {
+        log: false,
+      }),
+    );
 
     // Configure serving dll
     app.use(
@@ -98,7 +101,9 @@ export default class HotClientServer {
     );
 
     // Configure serving static files
-    app.use(express.static(path.resolve(appRootDir.get(), config.publicAssetsPath)));
+    app.use(
+      express.static(path.resolve(appRootDir.get(), config.publicAssetsPath)),
+    );
 
     // Fallback
     app.use(historyApiFallback());
@@ -132,9 +137,12 @@ export default class HotClientServer {
   buildOnlyStrategy() {
     const { compiler } = this.bundle;
 
-    compiler.watch({
-      ignored: /node_modules/,
-    }, () => undefined);
+    compiler.watch(
+      {
+        ignored: /node_modules/,
+      },
+      () => undefined,
+    );
   }
 
   dispose() {

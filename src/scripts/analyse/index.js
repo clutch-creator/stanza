@@ -13,7 +13,9 @@ import { exec } from '../../utils';
 import config from '../../config';
 
 const anaylzeFilePath = pathResolve(
-  appRootDir.get(), config.bundles.client.outputPath, '__analyze__.json',
+  appRootDir.get(),
+  config.bundles.client.outputPath,
+  '__analyze__.json',
 );
 
 const clientCompiler = webpack(clientConfigFactory());
@@ -29,7 +31,9 @@ clientCompiler.run((err, stats) => {
     );
 
     // Run the bundle analyzer against the stats file.
-    const cmd = `webpack-bundle-analyzer ${anaylzeFilePath} ${config.bundles.client.outputPath}`;
+    const cmd = `webpack-bundle-analyzer ${anaylzeFilePath} ${
+      config.bundles.client.outputPath
+    }`;
     exec(cmd);
   }
 });

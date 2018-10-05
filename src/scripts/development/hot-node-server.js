@@ -90,11 +90,13 @@ class HotNodeServer {
       notify: true,
     });
 
-    newServer.stdout.on('data', data => log({
-      title: `[${name}]`,
-      level: 'info',
-      message: data.toString().trim(),
-    }));
+    newServer.stdout.on('data', (data) =>
+      log({
+        title: `[${name}]`,
+        level: 'info',
+        message: data.toString().trim(),
+      }),
+    );
 
     newServer.stderr.on('data', (data) => {
       log({
@@ -144,7 +146,8 @@ class HotNodeServer {
           log({
             title: name,
             level: 'error',
-            message: 'Failed to start, please check the console for more information.',
+            message:
+              'Failed to start, please check the console for more information.',
             notify: true,
           });
           console.error(err);
@@ -178,7 +181,9 @@ class HotNodeServer {
       this.watcher.close(resolve);
     });
 
-    return stopWatcher.then(() => { if (this.server) this.server.kill(); });
+    return stopWatcher.then(() => {
+      if (this.server) this.server.kill();
+    });
   }
 }
 

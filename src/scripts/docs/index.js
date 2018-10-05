@@ -54,10 +54,7 @@ const config = {
   source,
   destination,
   includes: ['\\.(js|jsx)$'],
-  excludes: [
-    '.*/__tests__/\\.js$',
-    '.*/test/\\.js$',
-  ],
+  excludes: ['.*/__tests__/\\.js$', '.*/test/\\.js$'],
   manual,
   experimentalProposal: {
     classProperties: true,

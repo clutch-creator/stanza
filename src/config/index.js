@@ -15,7 +15,9 @@ import filterObject from './internals/filterObject';
 // This protects us from accidentally including this configuration in our
 // client bundle. That would be a big NO NO to do. :)
 if (process.env.IS_CLIENT) {
-  throw new Error("You shouldn't be importing the `./config` directly into your 'client' or 'shared' source as the configuration object will get included in your client bundle. Not a safe move! Instead, use the `safeConfigGet` helper function (located at `./src/shared/utils/config`) within the 'client' or 'shared' source files to reference configuration values in a safe manner.");
+  throw new Error(
+    "You shouldn't be importing the `./config` directly into your 'client' or 'shared' source as the configuration object will get included in your client bundle. Not a safe move! Instead, use the `safeConfigGet` helper function (located at `./src/shared/utils/config`) within the 'client' or 'shared' source files to reference configuration values in a safe manner.",
+  );
 }
 
 // eslint-disable-next-line
@@ -99,11 +101,7 @@ let config = {
       srcEntryFile: './src/client/index.js',
 
       // Src paths.
-      srcPaths: [
-        './src/client',
-        './src/shared',
-        './config',
-      ],
+      srcPaths: ['./src/client', './src/shared', './config'],
 
       // Where does the client bundle output live?
       outputPath: './build/client',
@@ -168,11 +166,7 @@ let config = {
       srcEntryFile: './src/server/index.js',
 
       // Src paths.
-      srcPaths: [
-        './src/server',
-        './src/shared',
-        './config',
-      ],
+      srcPaths: ['./src/server', './src/shared', './config'],
 
       // Where does the server bundle output live?
       outputPath: './build/server',
@@ -187,7 +181,7 @@ let config = {
   // configuration adjustments.  Additionally it helps to make merging
   // from the origin starter kit a bit easier.
   plugins: {
-    envConfig: envVars => envVars,
+    envConfig: (envVars) => envVars,
 
     // This plugin allows you to provide final adjustments your babel
     // configurations for each bundle before they get processed.

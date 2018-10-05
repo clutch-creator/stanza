@@ -52,9 +52,7 @@ export default class HotDevelopment {
           message: 'creating dlls',
         });
 
-        promises.push(
-          createVendorDLL(bundle),
-        );
+        promises.push(createVendorDLL(bundle));
       }
     });
 
@@ -63,7 +61,8 @@ export default class HotDevelopment {
     } catch (err) {
       log({
         level: 'error',
-        message: 'Unfortunately an error occured whilst trying to build the vendor dll(s). Please check the console for more information.',
+        message:
+          'Unfortunately an error occured whilst trying to build the vendor dll(s). Please check the console for more information.',
         notify: true,
       });
 
@@ -92,13 +91,12 @@ export default class HotDevelopment {
           message: 'generating compiler',
         });
 
-        bundles.push(
-          this.initializeBundle(bundleName, bundleConfig),
-        );
+        bundles.push(this.initializeBundle(bundleName, bundleConfig));
       } catch (err) {
         log({
           level: 'error',
-          message: 'Client webpack config is invalid, please check the console for more information.',
+          message:
+            'Client webpack config is invalid, please check the console for more information.',
           notify: true,
         });
       }
@@ -117,13 +115,9 @@ export default class HotDevelopment {
       const { bundleConfig } = bundle;
 
       if (bundleConfig.target === 'client') {
-        this.hotClientServers.push(
-          new HotClientServer(bundle),
-        );
+        this.hotClientServers.push(new HotClientServer(bundle));
       } else if (bundleConfig.target === 'server') {
-        this.hotNodeServers.push(
-          new HotNodeServer(bundle),
-        );
+        this.hotNodeServers.push(new HotNodeServer(bundle));
       }
     });
   }
@@ -139,13 +133,11 @@ export default class HotDevelopment {
     if (bundleConfig.devVendorDLL && bundleConfig.devVendorDLL.enabled) {
       webpackConfig.plugins.push(
         new webpack.DllReferencePlugin({
-          manifest: require(
-            pathResolve(
-              appRootDir.get(),
-              bundleConfig.outputPath,
-              `${bundleConfig.devVendorDLL.name}.json`,
-            ),
-          ),
+          manifest: require(pathResolve(
+            appRootDir.get(),
+            bundleConfig.outputPath,
+            `${bundleConfig.devVendorDLL.name}.json`,
+          )),
         }),
       );
     }
@@ -158,11 +150,12 @@ export default class HotDevelopment {
   }
 
   dispose() {
-    const safeDisposer = server =>
-      (server ? server.dispose() : Promise.resolve());
+    const safeDisposer = (server) =>
+      server ? server.dispose() : Promise.resolve();
 
     // First the hot client server.
-    return Promise.all(this.hotClientServers.map(safeDisposer))
-      .then(() => Promise.all(this.hotNodeServers.map(safeDisposer)));
+    return Promise.all(this.hotClientServers.map(safeDisposer)).then(() =>
+      Promise.all(this.hotNodeServers.map(safeDisposer)),
+    );
   }
 }
