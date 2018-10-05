@@ -11,10 +11,10 @@
   },
   "bin": "./bin/stanzarize.js",
   "dependencies": {
+    "@babel/cli": "^7.1.2",
+    "@babel/core": "^7.1.2",
     "app-root-dir": "^1.0.2",
     "assets-webpack-plugin": "^3.9.7",
-    "babel-cli": "^6.22.2",
-    "babel-core": "^6.26.3",
     "babel-eslint": "^10.0.1",
     "babel-jest": "^23.6.0",
     "babel-loader": "^8.0.4",
