@@ -25,6 +25,7 @@
     "@babel/polyfill": "^7.0.0",
     "@babel/preset-env": "^7.1.0",
     "@babel/preset-react": "^7.0.0",
+    "@babel/runtime": "^7.1.2",
     "@babel/template": "^7.1.2",
     "app-root-dir": "^1.0.2",
     "assets-webpack-plugin": "^3.9.7",
