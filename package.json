@@ -71,6 +71,7 @@
     "svgo": "^1.1.1",
     "svgo-loader": "^2.2.0",
     "uglifyjs-webpack-plugin": "^2.0.1",
+    "user-home": "^2.0.0",
     "webpack": "^4.20.2",
     "webpack-bundle-analyzer": "^3.0.2",
     "webpack-dev-middleware": "^3.4.0",
