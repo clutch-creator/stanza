@@ -2,7 +2,7 @@ import webpack from 'webpack';
 import { resolve as pathResolve } from 'path';
 import appRootDir from 'app-root-dir';
 import md5 from 'md5';
-import fs from 'fs';
+import fs from 'fs-extra';
 
 function createVendorDLL(bundleConfig) {
   const dllConfig = bundleConfig.devVendorDLL;
@@ -27,6 +27,10 @@ function createVendorDLL(bundleConfig) {
     ),
   );
 
+  const vendorDLLHashFolderPath = pathResolve(
+    appRootDir.get(),
+    bundleConfig.outputPath,
+  );
   const vendorDLLHashFilePath = pathResolve(
     appRootDir.get(),
     bundleConfig.outputPath,
@@ -39,6 +43,11 @@ function createVendorDLL(bundleConfig) {
       devtool: 'inline-source-map',
       entry: {
         [dllConfig.name]: devDLLDependencies,
+      },
+      node: {
+        fs: 'empty',
+        module: 'empty',
+        child_process: 'empty',
       },
       output: {
         path: pathResolve(appRootDir.get(), bundleConfig.outputPath),
@@ -59,19 +68,25 @@ function createVendorDLL(bundleConfig) {
   }
 
   function buildVendorDLL() {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       const webpackConfig = webpackConfigFactory();
       const vendorDLLCompiler = webpack(webpackConfig);
-      vendorDLLCompiler.run((err) => {
-        if (err) {
+
+      vendorDLLCompiler.run((err, stats) => {
+        if (err || stats.hasErrors()) {
+          const info = stats.toJson();
+          console.log(err);
+          console.log(info.errors);
           reject(err);
           return;
         }
 
         // Update the dependency hash
-        fs.writeFileSync(vendorDLLHashFilePath, currentDependenciesHash);
+        fs.ensureDir(vendorDLLHashFolderPath).then(() => {
+          fs.writeFileSync(vendorDLLHashFilePath, currentDependenciesHash);
 
-        resolve();
+          resolve();
+        });
       });
     });
   }

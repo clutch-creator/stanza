@@ -26,7 +26,7 @@ export default class HotClientServer {
     const { compiler } = this.bundle;
     let initial = true;
 
-    compiler.plugin('compile', () => {
+    compiler.hooks.compile.tap('Stanza', () => {
       if (!initial) {
         log({
           title: `[${this.name}]`,
@@ -36,7 +36,7 @@ export default class HotClientServer {
       }
     });
 
-    compiler.plugin('done', (stats) => {
+    compiler.hooks.done.tap('Stanza', (stats) => {
       if (stats.hasErrors()) {
         log({
           title: `[${this.name}]`,
@@ -121,7 +121,7 @@ export default class HotClientServer {
 
     this.listenerManager = new ListenerManager(listener, 'client');
 
-    compiler.plugin('done', () => {
+    compiler.hooks.done.tap('Stanza', () => {
       if (initial) {
         log({
           title: `[${this.name}]`,

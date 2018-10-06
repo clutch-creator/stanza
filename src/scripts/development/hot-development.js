@@ -95,10 +95,10 @@ export default class HotDevelopment {
       } catch (err) {
         log({
           level: 'error',
-          message:
-            'Client webpack config is invalid, please check the console for more information.',
+          message: `[${bundleName}] webpack config is invalid, please check the console for more information.`,
           notify: true,
         });
+        console.log(err);
       }
     });
 

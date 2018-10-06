@@ -22,7 +22,7 @@ class HotNodeServer {
     const { name, compiler } = this.bundle;
     let initial = true;
 
-    compiler.plugin('compile', () => {
+    compiler.hooks.compile.tap('Stanza', () => {
       this.serverCompiling = true;
 
       if (!initial) {
@@ -34,7 +34,7 @@ class HotNodeServer {
       }
     });
 
-    compiler.plugin('done', (stats) => {
+    compiler.hooks.done.tap('Stanza', (stats) => {
       this.serverCompiling = false;
 
       if (this.disposing) {
@@ -127,18 +127,18 @@ class HotNodeServer {
     const { name, compiler } = this.bundle;
 
     if (this.clientCompiler) {
-      this.clientCompiler.plugin('compile', () => {
+      this.clientCompiler.hooks.compile.tap('Stanza', () => {
         this.clientCompiling = true;
       });
 
-      this.clientCompiler.plugin('done', (stats) => {
+      this.clientCompiler.hooks.done.tap('Stanza', (stats) => {
         if (!stats.hasErrors()) {
           this.clientCompiling = false;
         }
       });
     }
 
-    compiler.plugin('done', (stats) => {
+    compiler.hooks.done.tap('Stanza', (stats) => {
       if (!stats.hasErrors()) {
         try {
           this.waitForClientThenStartServer();

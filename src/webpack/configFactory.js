@@ -82,27 +82,26 @@ export default function webpackConfigFactory(buildOptions) {
     // native node module system.
     // Therefore we use the `webpack-node-externals` library to help us generate
     // an  externals config that will ignore all node_modules.
-    externals: removeEmpty([
-      ifNode(
-        () =>
-          bundleConfig.nodeExternals ||
-          nodeExternals(
-            // Some of our node_modules may contain files that depend on webpack
-            // loaders, e.g. CSS or SASS.
-            // For these cases please make sure that the file extensions are
-            // registered within the following configuration setting.
-            {
-              whitelist:
-                bundleConfig.whitelist ||
-                // We always want the source-map-support excluded.
-                ['source-map-support/register'].concat(
-                  // Then exclude any items specified in the config.
-                  config.nodeBundlesIncludeNodeModuleFileTypes || [],
-                ),
-            },
-          ),
-      ),
-    ]),
+    externals: ifElse(isNode)(
+      bundleConfig.nodeExternals || [
+        nodeExternals(
+          // Some of our node_modules may contain files that depend on webpack
+          // loaders, e.g. CSS or SASS.
+          // For these cases please make sure that the file extensions are
+          // registered within the following configuration setting.
+          {
+            whitelist:
+              bundleConfig.whitelist ||
+              // We always want the source-map-support excluded.
+              ['source-map-support/register'].concat(
+                // Then exclude any items specified in the config.
+                config.nodeBundlesIncludeNodeModuleFileTypes || [],
+              ),
+          },
+        ),
+      ],
+      [],
+    ),
 
     // Source map settings.
     devtool:
@@ -312,7 +311,7 @@ export default function webpackConfigFactory(buildOptions) {
       rules: removeEmpty([
         // JAVASCRIPT
         {
-          test: /\.jsx?$/,
+          test: /\.(js|jsx|flow)$/,
           include: removeEmpty([
             ...bundleConfig.srcPaths.map((srcPath) =>
               path.resolve(appRootDir.get(), srcPath),
@@ -333,6 +332,7 @@ export default function webpackConfigFactory(buildOptions) {
                 babelrc: false,
 
                 presets: [
+                  '@babel/preset-flow',
                   '@babel/react',
                   ifClient(['@babel/env', { modules: false }]),
                   ifNode([
@@ -345,14 +345,14 @@ export default function webpackConfigFactory(buildOptions) {
                 ].filter((x) => x != null),
 
                 plugins: [
-                  '@babel/plugin-proposal-class-properties',
+                  '@babel/plugin-proposal-export-default-from',
                   [
                     '@babel/plugin-proposal-decorators',
                     {
-                      decoratorsBeforeExport: true,
+                      legacy: true,
                     },
                   ],
-                  '@babel/plugin-proposal-export-default-from',
+                  ['@babel/plugin-proposal-class-properties', { loose: true }],
                   '@babel/plugin-syntax-dynamic-import',
                   '@babel/plugin-syntax-import-meta',
                   '@babel/plugin-transform-modules-commonjs',

@@ -118,7 +118,7 @@ let config = {
       // specify the inclusion of additional modules below.
       devVendorDLL: {
         // Enabled?
-        enabled: true,
+        enabled: false,
 
         // Specify any dependencies that you would like to include in the
         // Vendor DLL.
@@ -126,13 +126,7 @@ let config = {
         // NOTE: It is also possible that some modules require specific
         // webpack loaders in order to be processed (e.g. CSS/SASS etc).
         // For these cases you don't want to include them in the Vendor DLL.
-        include: [
-          'code-split-component',
-          'react',
-          'react-dom',
-          'react-helmet',
-          'react-router',
-        ],
+        include: ['react', 'react-dom', 'react-helmet', 'react-router'],
 
         // The name of the vendor DLL.
         name: '__dev_vendor_dll__',
