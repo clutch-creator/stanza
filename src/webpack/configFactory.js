@@ -300,28 +300,39 @@ export default function webpackConfigFactory(buildOptions) {
                 babelrc: false,
 
                 presets: [
-                  'react',
-                  ifClient(['env', { modules: false }]),
+                  '@babel/react',
+                  ifClient(['@babel/env', { modules: false }]),
                   ifNode([
-                    'env',
+                    '@babel/env',
                     {
                       targets: { node: bundleConfig.nodeTarget || 'current' },
                       modules: false,
                     },
                   ]),
-                  'stage-0',
                 ].filter((x) => x != null),
 
                 plugins: [
-                  'transform-decorators-legacy',
-                  // This decorates our components with  __self prop to JSX elements,
-                  // which React will use to generate some runtime warnings.
-                  ifDev('transform-react-jsx-self'),
-                  // Adding this will give us the path to our components in the
-                  // react dev tools.
-                  ifDev('transform-react-jsx-source'),
+                  '@babel/plugin-proposal-class-properties',
+                  [
+                    '@babel/plugin-proposal-decorators',
+                    {
+                      decoratorsBeforeExport: true,
+                    },
+                  ],
+                  '@babel/plugin-proposal-export-default-from',
+                  '@babel/plugin-syntax-dynamic-import',
+                  '@babel/plugin-syntax-import-meta',
+                  '@babel/plugin-transform-modules-commonjs',
+
                   // Required to support react hot loader.
                   ifDevServeClient('react-hot-loader/babel'),
+                  // This decorates our components with  __self prop to JSX elements,
+                  // which React will use to generate some runtime warnings.
+                  ifDev('@babel/plugin-transform-react-jsx-self'),
+                  // Adding this will give us the path to our components in the
+                  // react dev tools.
+                  ifDev('@babel/plugin-transform-react-jsx-source'),
+                  '@babel/plugin-transform-runtime',
                 ].filter((x) => x != null),
               },
               buildOptions,
