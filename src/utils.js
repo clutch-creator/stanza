@@ -1,24 +1,11 @@
-import HappyPack from 'happypack';
 import notifier from 'node-notifier';
 import colors from 'colors/safe';
 import { execSync } from 'child_process';
 import appRootDir from 'app-root-dir';
 
-
-// Generates a HappyPack plugin.
-// @see https://github.com/amireh/happypack/
-export function happyPackPlugin({ name, loaders }) {
-  return new HappyPack({
-    id: name,
-    verbose: false,
-    threads: 5,
-    loaders,
-  });
-}
-
 // Removes the empty items from the given array.
 export function removeEmpty(x) {
-  return x.filter(y => y != null);
+  return x.filter((y) => y != null);
 }
 
 // This is a higher order function that accepts a boolean condition and will
@@ -50,8 +37,8 @@ export function removeEmpty(x) {
 export function ifElse(condition) {
   // TODO: Allow the then/or to accept a function for lazy value resolving.
   return function ifElseResolver(then, or) {
-    const execIfFuc = x => (typeof x === 'function' ? x() : x);
-    return condition ? execIfFuc(then) : (or);
+    const execIfFuc = (x) => (typeof x === 'function' ? x() : x);
+    return condition ? execIfFuc(then) : or;
   };
 }
 
@@ -79,7 +66,6 @@ export function merge(...args) {
   }, {});
 }
 
-
 export function log(options) {
   const title = options.title && `${options.title.toUpperCase()}`;
 
@@ -95,23 +81,14 @@ export function log(options) {
 
   switch (level) {
     case 'warn':
-      console.log(
-        colors.yellow('warn'),
-        msg,
-      );
+      console.log(colors.yellow('warn'), msg);
       break;
     case 'error':
-      console.log(
-        colors.bgRed.white('error'),
-        msg,
-      );
+      console.log(colors.bgRed.white('error'), msg);
       break;
     case 'info':
     default:
-      console.log(
-        colors.grey(title),
-        msg,
-      );
+      console.log(colors.grey(title), msg);
   }
 }
 

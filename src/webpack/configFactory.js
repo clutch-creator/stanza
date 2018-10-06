@@ -2,11 +2,11 @@ import path from 'path';
 import webpack from 'webpack';
 import AssetsPlugin from 'assets-webpack-plugin';
 import nodeExternals from 'webpack-node-externals';
-import ExtractTextPlugin from 'extract-text-webpack-plugin';
 import UglifyJsPlugin from 'uglifyjs-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import appRootDir from 'app-root-dir';
-import { removeEmpty, ifElse, merge, happyPackPlugin } from '../utils';
+import { removeEmpty, ifElse, merge } from '../utils';
 import config, { clientConfig } from '../config';
 
 /**
@@ -40,7 +40,7 @@ export default function webpackConfigFactory(buildOptions) {
 
   // Preconfigure some ifElse helper instnaces. See the util docs for more
   // information on how this util works.
-  const ifDevClient = ifElse(isDev && isClient);
+  // const ifDevClient = ifElse(isDev && isClient);
   const ifDevServeClient = ifElse(isDev && isClient && bundleConfig.webPath);
   const ifProdClient = ifElse(isProd && isClient);
 
@@ -58,6 +58,8 @@ export default function webpackConfigFactory(buildOptions) {
   }
 
   const webpackConfig = {
+    mode,
+
     target: isClient
       ? // Only our client bundle will target the web as a runtime.
         'web'
@@ -265,32 +267,63 @@ export default function webpackConfigFactory(buildOptions) {
         ),
       ),
 
-      // For the production build of the client we need to extract the CSS into
-      // CSS files.
+      // CSS
       ifProdClient(
         () =>
-          new ExtractTextPlugin({
-            filename: '[name]-[hash].css',
-            allChunks: true,
+          new MiniCssExtractPlugin({
+            // Options similar to the same options in webpackOptions.output
+            // both options are optional
+            filename: isDev ? '[name].css' : '[name]-[hash].css',
+            chunkFilename: isDev ? '[id].css' : '[id]-[hash].css',
           }),
       ),
 
-      // -----------------------------------------------------------------------
-      // START: HAPPY PACK PLUGINS
-      //
-      // @see https://github.com/amireh/happypack/
+      // Client HTML
+      ifElse(isClient && bundleConfig.htmlPage)(
+        () =>
+          new HtmlWebpackPlugin({
+            filename: 'index.html',
+            template: path.resolve(__dirname, 'html-page'),
+            minify: {
+              removeComments: true,
+              collapseWhitespace: true,
+              removeRedundantAttributes: true,
+              useShortDoctype: true,
+              removeEmptyAttributes: true,
+              removeStyleLinkTypeAttributes: true,
+              keepClosingSlash: true,
+              minifyJS: true,
+              minifyCSS: true,
+              minifyURLs: true,
+            },
+            inject: true,
+            // We pass our config objects as values as they will be needed
+            // by the template.
+            custom: {
+              config,
+              bundleConfig,
+              clientConfig,
+            },
+          }),
+      ),
+    ]),
 
-      // HappyPack 'javascript' instance.
-      happyPackPlugin({
-        name: 'happypack-javascript',
-        // We will use babel to do all our JS processing.
-        loaders: [
-          {
-            path: 'babel-loader',
+    module: {
+      rules: removeEmpty([
+        // JAVASCRIPT
+        {
+          test: /\.jsx?$/,
+          include: removeEmpty([
+            ...bundleConfig.srcPaths.map((srcPath) =>
+              path.resolve(appRootDir.get(), srcPath),
+            ),
+          ]),
+          use: {
+            loader: 'babel-loader',
             // We will create a babel config and pass it through the plugin
             // defined in the project configuration, allowing additional
             // items to be added.
-            query: config.plugins.babelConfig(
+            options: config.plugins.babelConfig(
               // Our "standard" babel config.
               {
                 // We need to ensure that we do this otherwise the babelrc will
@@ -338,20 +371,17 @@ export default function webpackConfigFactory(buildOptions) {
               buildOptions,
             ),
           },
-        ],
-      }),
+        },
 
-      // HappyPack 'css' instance for development client.
-      ifDevClient(() =>
-        happyPackPlugin({
-          name: 'happypack-devclient-css',
-          loaders: [
-            'style-loader',
+        // CSS
+        ifClient({
+          test: /\.(css|sass|scss)$/,
+          use: [
+            isDev ? 'style-loader' : MiniCssExtractPlugin.loader,
             {
-              path: 'css-loader',
-              // Include sourcemaps for dev experience++.
-              query: {
-                sourceMap: true,
+              loader: 'css-loader',
+              options: {
+                sourceMap: isDev,
                 modules: true,
                 importLoaders: 1,
                 localIdentName: '[name]__[local]___[hash:base64:5]',
@@ -360,85 +390,10 @@ export default function webpackConfigFactory(buildOptions) {
             'sass-loader',
           ],
         }),
-      ),
-
-      // END: HAPPY PACK PLUGINS
-      // -----------------------------------------------------------------------
-
-      // Client HTML
-      ifElse(isClient && bundleConfig.htmlPage)(
-        () =>
-          new HtmlWebpackPlugin({
-            filename: 'index.html',
-            template: path.resolve(__dirname, 'html-page'),
-            minify: {
-              removeComments: true,
-              collapseWhitespace: true,
-              removeRedundantAttributes: true,
-              useShortDoctype: true,
-              removeEmptyAttributes: true,
-              removeStyleLinkTypeAttributes: true,
-              keepClosingSlash: true,
-              minifyJS: true,
-              minifyCSS: true,
-              minifyURLs: true,
-            },
-            inject: true,
-            // We pass our config objects as values as they will be needed
-            // by the template.
-            custom: {
-              config,
-              bundleConfig,
-              clientConfig,
-            },
-          }),
-      ),
-    ]),
-
-    module: {
-      rules: removeEmpty([
-        // JAVASCRIPT
-        {
-          test: /\.jsx?$/,
-          loader: 'happypack/loader?id=happypack-javascript',
-          include: removeEmpty([
-            ...bundleConfig.srcPaths.map((srcPath) =>
-              path.resolve(appRootDir.get(), srcPath),
-            ),
-          ]),
-        },
-
-        // CSS
-        ifElse(isClient || isNode)(
-          merge(
-            {
-              test: /\.(css|sass|scss)$/,
-            },
-            ifDevClient({
-              loaders: ['happypack/loader?id=happypack-devclient-css'],
-            }),
-            ifProdClient(() => ({
-              loader: ExtractTextPlugin.extract({
-                fallback: 'style-loader',
-                use: [
-                  {
-                    loader: 'css-loader',
-                    options: {
-                      sourceMap: false,
-                      modules: true,
-                      importLoaders: 1,
-                      localIdentName: '[name]__[local]___[hash:base64:5]',
-                    },
-                  },
-                  'sass-loader',
-                ],
-              }),
-            })),
-            ifNode({
-              loaders: ['css-loader/locals'],
-            }),
-          ),
-        ),
+        ifNode({
+          test: /\.(css|sass|scss)$/,
+          use: ['css-loader/locals'],
+        }),
 
         // GraphQL
         {
