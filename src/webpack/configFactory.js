@@ -187,6 +187,7 @@ export default function webpackConfigFactory(buildOptions) {
         chunkFilename: '[name]-[hash].js',
         // When in node mode we will output our bundle as a commonjs2 module.
         libraryTarget: ifNode('commonjs2', 'var'),
+        globalObject: `(typeof self !== 'undefined' ? self : this)`,
       },
       // This is the web path under which our webpack bundled client should
       // be considered as being served from.
@@ -332,7 +333,7 @@ export default function webpackConfigFactory(buildOptions) {
                 babelrc: false,
 
                 presets: [
-                  '@babel/preset-flow',
+                  '@babel/flow',
                   '@babel/react',
                   ifClient(['@babel/env', { modules: false }]),
                   ifNode([
@@ -345,6 +346,7 @@ export default function webpackConfigFactory(buildOptions) {
                 ].filter((x) => x != null),
 
                 plugins: [
+                  '@babel/plugin-syntax-export-extensions',
                   '@babel/plugin-proposal-export-default-from',
                   [
                     '@babel/plugin-proposal-decorators',
@@ -352,9 +354,9 @@ export default function webpackConfigFactory(buildOptions) {
                       legacy: true,
                     },
                   ],
-                  ['@babel/plugin-proposal-class-properties', { loose: true }],
                   '@babel/plugin-syntax-dynamic-import',
                   '@babel/plugin-syntax-import-meta',
+                  ['@babel/plugin-proposal-class-properties', { loose: false }],
                   '@babel/plugin-transform-modules-commonjs',
 
                   // Required to support react hot loader.

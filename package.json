@@ -17,6 +17,7 @@
     "@babel/plugin-proposal-decorators": "^7.0.0",
     "@babel/plugin-proposal-export-default-from": "^7.0.0",
     "@babel/plugin-syntax-dynamic-import": "^7.0.0",
+    "@babel/plugin-syntax-export-extensions": "^7.0.0-beta.32",
     "@babel/plugin-syntax-import-meta": "^7.0.0",
     "@babel/plugin-transform-modules-commonjs": "^7.1.0",
     "@babel/plugin-transform-react-jsx-self": "^7.0.0",
