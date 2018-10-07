@@ -12,21 +12,33 @@ process.env.NODE_ENV = 'production';
 // First clear the build output dir.
 rimraf.sync(pathResolve(appRootDir.get(), config.buildOutputPath));
 
-Object.keys(config.bundles).forEach((bundleName) => {
+const compilers = Object.keys(config.bundles).map((bundleName) => {
   const bundleConfig = config.bundles[bundleName];
-  const compiler = webpack(
+
+  return webpack(
     webpackConfigFactory({
       target: bundleConfig.target,
       mode: 'production',
       bundleConfig,
     }),
   );
-
-  compiler.run((err, stats) => {
-    if (err) {
-      console.error(err);
-      return;
-    }
-    console.log(stats.toString({ colors: true }));
-  });
 });
+
+async function runCompilers() {
+  for (let i = 0; i < compilers.length; i += 1) {
+    await new Promise((accept) => {
+      compilers[i].run((err, stats) => {
+        if (err) {
+          console.error(err);
+          return;
+        }
+
+        // console.log(stats.toString({ colors: true }));
+        console.log(`Done ${i + 1}/${compilers.length}`)
+        accept();
+      });
+    });
+  }
+}
+
+runCompilers();
