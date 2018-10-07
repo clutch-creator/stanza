@@ -216,6 +216,19 @@ export default function webpackConfigFactory(buildOptions) {
       // We don't want webpack errors to occur during development as it will
       // kill our dev servers.
       noEmitOnErrors: isDev,
+      minimizer: [
+        new UglifyJsPlugin({
+          sourceMap: false,
+          parallel: true,
+          uglifyOptions: {
+            ie8: false,
+            output: {
+              comments: false,
+            },
+            warnings: false,
+          },
+        }),
+      ],
     },
 
     plugins: removeEmpty([
@@ -246,25 +259,6 @@ export default function webpackConfigFactory(buildOptions) {
           new webpack.LoaderOptionsPlugin({
             minimize: config.optimizeProductionBuilds,
           }),
-      ),
-
-      // For our production client we need to make sure we pass the required
-      // configuration to ensure that the output is minimized/optimized.
-      ifProdClient(
-        ifElse(config.optimizeProductionBuilds)(
-          () =>
-            new UglifyJsPlugin({
-              sourceMap: config.includeSourceMapsForProductionBuilds,
-              parallel: true,
-              uglifyOptions: {
-                ie8: false,
-                output: {
-                  comments: false,
-                },
-                warnings: false,
-              },
-            }),
-        ),
       ),
 
       // CSS
