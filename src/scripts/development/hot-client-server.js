@@ -78,6 +78,7 @@ export default class HotClientServer {
     this.webpackDevMiddleware = createWebpackMiddleware(compiler, {
       quiet: true,
       noInfo: true,
+      logLevel: 'warn',
       headers: {
         'Access-Control-Allow-Origin': '*',
       },
@@ -91,6 +92,8 @@ export default class HotClientServer {
     app.use(
       createWebpackHotMiddleware(compiler, {
         log: false,
+        noInfo: false,
+        quiet: true,
       }),
     );
 
