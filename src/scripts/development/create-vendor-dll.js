@@ -40,6 +40,7 @@ function createVendorDLL(bundleConfig) {
   function webpackConfigFactory() {
     return {
       // We only use this for development, so lets always include source maps.
+      mode: 'development',
       devtool: 'inline-source-map',
       entry: {
         [dllConfig.name]: devDLLDependencies,
