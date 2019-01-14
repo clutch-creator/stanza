@@ -14,7 +14,7 @@ export default (noCoverage) => {
     setupTestFrameworkScriptFile: setupTestsFile,
     testEnvironment: 'node',
     testURL: 'http://localhost',
-    moduleFileExtensions: ['js', 'jsx'],
+    moduleFileExtensions: ['js', 'jsx', 'json'],
     moduleDirectories: ['src', 'shared', 'node_modules'],
     transform: {
       '^.+\\.(js|jsx)$': path.resolve(__dirname, 'babel-transform.js'),
