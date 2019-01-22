@@ -372,6 +372,11 @@ export default function webpackConfigFactory(buildOptions) {
         // CSS
         ifClient({
           test: /\.(css|sass|scss)$/,
+          include: removeEmpty([
+            ...bundleConfig.srcPaths.map((srcPath) =>
+              path.resolve(appRootDir.get(), srcPath),
+            ),
+          ]),
           use: [
             isDev ? 'style-loader' : MiniCssExtractPlugin.loader,
             {
@@ -381,6 +386,27 @@ export default function webpackConfigFactory(buildOptions) {
                 modules: true,
                 importLoaders: 1,
                 localIdentName: '[name]__[local]___[hash:base64:5]',
+              },
+            },
+            'sass-loader',
+          ],
+        }),
+        ifClient({
+          test: /\.css$/,
+          exclude: removeEmpty([
+            ...bundleConfig.srcPaths.map((srcPath) =>
+              path.resolve(appRootDir.get(), srcPath),
+            ),
+          ]),
+          use: [
+            isDev ? 'style-loader' : MiniCssExtractPlugin.loader,
+            {
+              loader: 'css-loader',
+              options: {
+                sourceMap: false,
+                modules: false,
+                importLoaders: 1,
+                localIdentName: '_nm_[name]__[local]___[hash:base64:5]',
               },
             },
             'sass-loader',
