@@ -2,7 +2,7 @@ import path from 'path';
 import webpack from 'webpack';
 import AssetsPlugin from 'assets-webpack-plugin';
 import nodeExternals from 'webpack-node-externals';
-import UglifyJsPlugin from 'uglifyjs-webpack-plugin';
+import TerserPlugin from 'terser-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import appRootDir from 'app-root-dir';
@@ -217,14 +217,11 @@ export default function webpackConfigFactory(buildOptions) {
       // kill our dev servers.
       noEmitOnErrors: isDev,
       minimizer: [
-        new UglifyJsPlugin({
+        new TerserPlugin({
           sourceMap: false,
           parallel: true,
-          uglifyOptions: {
+          terserOptions: {
             ie8: false,
-            output: {
-              comments: false,
-            },
             warnings: false,
           },
         }),

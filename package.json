@@ -73,7 +73,7 @@
     "svg-sprite-loader": "^4.1.2",
     "svgo": "^1.1.1",
     "svgo-loader": "^2.2.0",
-    "uglifyjs-webpack-plugin": "^2.0.1",
+    "terser-webpack-plugin": "^1.2.3",
     "user-home": "^2.0.0",
     "webpack": "^4.20.2",
     "webpack-bundle-analyzer": "^3.0.2",
