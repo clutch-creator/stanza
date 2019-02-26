@@ -46,7 +46,7 @@ let config = {
   includeSourceMapsForProductionBuilds: false,
 
   // These extensions are tried when resolving src files for our bundles..
-  bundleSrcTypes: ['js', 'jsx', 'json'],
+  bundleSrcTypes: ['mjs', 'js', 'jsx', 'json'],
 
   // Additional asset types to be supported for our bundles.
   // i.e. you can import the following file types within your source and the
