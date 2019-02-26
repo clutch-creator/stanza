@@ -223,7 +223,7 @@ export default function webpackConfigFactory(buildOptions) {
           terserOptions: {
             ie8: false,
             warnings: false,
-            mangle: false,
+            mangle: true,
           },
         }),
       ],
