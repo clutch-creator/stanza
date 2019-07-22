@@ -2,7 +2,7 @@
   "name": "stanzarize",
   "version": "3.0.18",
   "main": "bin/stanza.js",
-  "repository": "git@github.com:stanza/stanza.git",
+  "repository": "git@github.com:shift-studio/stanza.git",
   "author": "Bruno Mota <bruno12mota@gmail.com>",
   "license": "MIT",
   "scripts": {
