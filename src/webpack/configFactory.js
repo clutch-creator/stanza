@@ -304,6 +304,11 @@ export default function webpackConfigFactory(buildOptions) {
       rules: removeEmpty([
         // JAVASCRIPT
         {
+          test: /\.mjs$/,
+          include: /node_modules/,
+          type: 'javascript/auto',
+        },
+        {
           test: /\.(js|jsx|flow|mjs)$/,
           include: removeEmpty([
             ...bundleConfig.srcPaths.map((srcPath) =>
