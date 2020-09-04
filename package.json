@@ -59,7 +59,7 @@
     "md5": "^2.2.1",
     "mini-css-extract-plugin": "^0.4.3",
     "node-notifier": "^5.2.1",
-    "node-sass": "^4.9.3",
+    "node-sass": "^4.13.1",
     "react-addons-test-utils": "^15.4.2",
     "react-hot-loader": "^4.12.16",
     "regenerator-runtime": "^0.12.1",
